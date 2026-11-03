@@ -16,3 +16,5 @@ tools/playcheck/node_modules/
 /*.pdf
 !examples/**/*.png
 __pycache__/
+# generated examples of the cosmos ornament (node js/cosmos/examples/generate.js)
+js/cosmos/examples/out/

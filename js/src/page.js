@@ -4,7 +4,7 @@
 // Only the flora theme, default summer, no header (head=false), no author page.
 "use strict";
 const ink = require("./ink.js");
-const grow = require("./grow.js");
+const floralGrow = require("./grow.js");
 const { fixed } = require("./fmt.js");
 
 const floor = Math.floor;
@@ -207,7 +207,9 @@ function page(o) {
   const old = ink.set_pale(0.85 * (1 - Math.max(0, Math.min(1, intensity))));
   let stats;
   try {
-    stats = grow.page(g).stats;
+    // o.grow swaps the growth module (the cosmos ornament in js/cosmos grows
+    // its motifs through this page); without it the garden is the flora one.
+    stats = (o.grow || floralGrow).page(g).stats;
   } catch (e) {
     ink.take_recording(); ink.discard(); ink.set_lift(0); ink.set_pale(0);
     throw e;

@@ -1,13 +1,13 @@
 # florilegium для электронных книг
 
-![Шмуцтитул, начало главы и живой сад на трёх экранах](../examples/voyna-v-rayu/снимки/live.png)
+![Шмуцтитул, начало главы и живой сад на трёх экранах](../examples/war-in-heaven/снимки/live.png)
 
 **English.** This is a fork of [kevinraymond/florilegium](https://github.com/kevinraymond/florilegium),
 the procedurally grown Delft-blue margins for LuaLaTeX, adapted to put those gardens into e-books.
 It adds three things:
 - [`js/`](../js/README.md) — a JavaScript port of the garden generator, byte for byte the same SVG as the Lua, so an ePub can regrow a garden to the reader's screen;
 - [`ebook-build/`](../ebook-build/SKILL.md) — a Claude skill, in Russian, that builds and verifies ePub, FB2 and MOBI from a Markdown manuscript, with gardens on part-title pages and in chapters;
-- [`examples/`](../examples/voyna-v-rayu/README.md) — a short story built every way the skill can build it.
+- [`examples/`](../examples/war-in-heaven/README.md) — a short story built every way the skill can build it.
 
 Upstream's own README is [`README.md`](../README.md); everything there still holds. The rest of this page is in Russian.
 
@@ -31,37 +31,37 @@ Upstream's own README is [`README.md`](../README.md); everything there still hol
 |---|---|
 | [`js/`](../js/README.md) | Порт генератора на JavaScript: страница с садом, заставка главы, концовка, плитка буквицы и скрипты живых страниц ePub. Один файл [`js/dist/florilegium-garden.js`](../js/dist/florilegium-garden.js), около 135 КБ, без зависимостей |
 | [`ebook-build/`](../ebook-build/SKILL.md) | Скилл для Claude: сборка ePub, FB2, MOBI, Markdown и фрагментов из глав в Markdown, проверка готовых файлов, режимы, альфа-сборки, сады, переносимый комплект проекта |
-| [`examples/voyna-v-rayu/`](../examples/voyna-v-rayu/README.md) | Рассказ «Война в Раю», собранный тремя способами: спокойно, с садами, с живым садом |
+| [`examples/war-in-heaven/`](../examples/war-in-heaven/README.md) | Рассказ «Война в Раю», собранный тремя способами: спокойно, с садами, с живым садом |
 | всё остальное | florilegium как есть, синхронизируется с автором |
 
 ## Как это выглядит
 
 Одна и та же книга, ePub. Слева направо: спокойная глава, глава с садом (заставка и буквица), шмуцтитул части, пролог с эпиграфом.
 
-![ePub: спокойная глава, глава с садом, шмуцтитул, пролог](../examples/voyna-v-rayu/снимки/epub.png)
+![ePub: спокойная глава, глава с садом, шмуцтитул, пролог](../examples/war-in-heaven/снимки/epub.png)
 
 Живой сад: тот же шмуцтитул на телефоне, на планшете и в альбомной ориентации. Seed один, сад каждый раз растёт под пропорции страницы. При пропорции листа 120:200 вырастает тот же сад, что на статичной картинке.
 
-![Живой сад на трёх экранах](../examples/voyna-v-rayu/снимки/live.png)
+![Живой сад на трёх экранах](../examples/war-in-heaven/снимки/live.png)
 
 FB2 и MOBI (здесь их показывает Calibre). Текст поверх картинки FB2 не умеет, поэтому сад встаёт отдельной страницей под заголовком части. MOBI собирается из ePub: в нём остаётся то, что старые Kindle умеют показать.
 
-![FB2: шмуцтитул и сад, глава; MOBI: глава](../examples/voyna-v-rayu/снимки/fb2-mobi.png)
+![FB2: шмуцтитул и сад, глава; MOBI: глава](../examples/war-in-heaven/снимки/fb2-mobi.png)
 
 Скачать и открыть в своей читалке:
 
 | Сборка | ePub | FB2 | MOBI |
 |---|---|---|---|
-| Спокойная | [epub](../examples/voyna-v-rayu/книги/Война_в_Раю.epub) | [fb2](../examples/voyna-v-rayu/книги/Война_в_Раю.fb2) | [mobi](../examples/voyna-v-rayu/книги/Война_в_Раю.mobi) |
-| С садами | [epub](../examples/voyna-v-rayu/книги/Война_в_Раю_сад.epub) | [fb2](../examples/voyna-v-rayu/книги/Война_в_Раю_сад.fb2) | — |
-| Живой сад | [epub](../examples/voyna-v-rayu/книги/Война_в_Раю_живой_сад.epub) | — | — |
-| Фрагмент: пролог и главы 1–2 | [спокойный](../examples/voyna-v-rayu/книги/Война_в_Раю_фрагмент.epub), [с садами](../examples/voyna-v-rayu/книги/Война_в_Раю_фрагмент_сад.epub), [живой](../examples/voyna-v-rayu/книги/Война_в_Раю_фрагмент_живой_сад.epub) | — | — |
+| Спокойная | [epub](../examples/war-in-heaven/книги/Война_в_Раю.epub) | [fb2](../examples/war-in-heaven/книги/Война_в_Раю.fb2) | [mobi](../examples/war-in-heaven/книги/Война_в_Раю.mobi) |
+| С садами | [epub](../examples/war-in-heaven/книги/Война_в_Раю_сад.epub) | [fb2](../examples/war-in-heaven/книги/Война_в_Раю_сад.fb2) | — |
+| Живой сад | [epub](../examples/war-in-heaven/книги/Война_в_Раю_живой_сад.epub) | — | — |
+| Фрагмент: пролог и главы 1–2 | [спокойный](../examples/war-in-heaven/книги/Война_в_Раю_фрагмент.epub), [с садами](../examples/war-in-heaven/книги/Война_в_Раю_фрагмент_сад.epub), [живой](../examples/war-in-heaven/книги/Война_в_Раю_фрагмент_живой_сад.epub) | — | — |
 
 Живой сад виден в Apple Books и в читалках на браузерном движке. Где скриптов нет (e-ink, Kindle, FB2, MOBI), остаётся та же картинка, что в садовой сборке.
 
 ## Как собирается книга
 
-Всё, что описывает книгу, лежит в одном `book.json` рядом с главами: порядок глав, части, аннотация, обложка, фрагменты, режимы, сады. Скрипты от книги не зависят. Пример: [`examples/voyna-v-rayu/book.json`](../examples/voyna-v-rayu/book.json), все поля — в [`references/config.md`](../ebook-build/references/config.md).
+Всё, что описывает книгу, лежит в одном `book.json` рядом с главами: порядок глав, части, аннотация, обложка, фрагменты, режимы, сады. Скрипты от книги не зависят. Пример: [`examples/war-in-heaven/book.json`](../examples/war-in-heaven/book.json), все поля — в [`references/config.md`](../ebook-build/references/config.md).
 
 1. **Главы в Markdown.** По файлу на главу, первая строка `# Заголовок`. Поддерживаются курсив, полужирный, отбивки сцен, подзаголовки, цитаты, переносы строк внутри абзаца. Порядок задаётся списком, а не сортировкой имён.
 2. **Очистка.** Из глав вырезаются служебные пометки автора: шапки версий, «КОНЕЦ ГЛАВЫ», комментарии, раздел заметок в конце файла. Голая нумерация сцен (`## II`) становится отбивкой, а не исчезает, иначе сцены склеиваются. Список пометок расширяется в `book.json`.
@@ -108,7 +108,7 @@ FB2 и MOBI (здесь их показывает Calibre). Текст пове�
 
 ```bash
 git clone https://github.com/jfoboss/florilegium
-cd florilegium/examples/voyna-v-rayu
+cd florilegium/examples/war-in-heaven
 bash ../../ebook-build/scripts/setup_env.sh         # ebooklib, Calibre
 python3 ../../ebook-build/scripts/make_gardens.py --config book.json
 python3 ../../ebook-build/scripts/build_book.py --config book.json --all-modes

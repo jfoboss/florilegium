@@ -22,7 +22,7 @@ description: Сборка электронных книг из рукописи 
 | `scripts/make_gardens.py` | Режим с садом: выращивает сады для шмуцтитулов частей по seed из `book.json` |
 | `scripts/florilegium-garden.js` | Живой сад: движок florilegium на JS, украшения глав и скрипты страниц; кладётся в ePub как есть |
 | `scripts/garden_render.js` | Рисует украшения глав движком на JS (его вызывает `make_gardens.py`) |
-| `assets/book.example.json` | Шаблон настроек — начинай с копии. Настоящая собранная книга: `examples/voyna-v-rayu/` в корне репозитория |
+| `assets/book.example.json` | Шаблон настроек — начинай с копии. Настоящая собранная книга: `examples/war-in-heaven/` в корне репозитория |
 | `assets/book.alpha.example.json` | Пример альфы: два режима, плашка, заметки над главами, «От автора», контрольные фразы |
 | `references/config.md` | Все поля `book.json` |
 | `references/formats.md` | Форматы, обложка, аннотация, служебные страницы |

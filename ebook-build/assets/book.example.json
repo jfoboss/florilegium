@@ -1,0 +1,192 @@
+{
+  "title": "Северный ветер",
+  "subtitle": "Книга первая",
+  "author": "Автор Примерный",
+  "language": "ru",
+  "series": {
+    "name": "Ветра",
+    "index": 1
+  },
+  "edition": "публичная бета 1.0",
+  "genres_fb2": [
+    "sf_space",
+    "sf_detective"
+  ],
+  "chapters_dir": "главы",
+  "chapters": [
+    "00_prolog.md",
+    "01_chapter01.md",
+    "02_chapter02.md",
+    "03_chapter03.md",
+    "04_chapter04.md",
+    "05_chapter05.md",
+    "06_chapter06.md",
+    "07_chapter07.md",
+    "08_chapter08.md",
+    "09_chapter09.md",
+    "10_chapter10.md",
+    "11_chapter11.md",
+    "12_chapter12.md",
+    "13_chapter13.md",
+    "14_chapter14.md",
+    "15_chapter15.md",
+    "16_chapter16.md",
+    "17_chapter17.md",
+    "18_chapter18.md",
+    "19_chapter19.md",
+    "20_chapter20.md",
+    "21_epilogue.md"
+  ],
+  "parts": [
+    {
+      "label": "АКТ ПЕРВЫЙ",
+      "name": "Письмо",
+      "chapters": [
+        "01_chapter01.md",
+        "02_chapter02.md",
+        "03_chapter03.md",
+        "04_chapter04.md"
+      ]
+    },
+    {
+      "label": "АКТ ВТОРОЙ",
+      "name": "Дорога",
+      "chapters": [
+        "05_chapter05.md",
+        "06_chapter06.md",
+        "07_chapter07.md",
+        "08_chapter08.md"
+      ]
+    },
+    {
+      "label": "АКТ ТРЕТИЙ",
+      "name": "Ярмарка",
+      "chapters": [
+        "09_chapter09.md",
+        "10_chapter10.md",
+        "11_chapter11.md",
+        "12_chapter12.md"
+      ]
+    },
+    {
+      "label": "АКТ ЧЕТВЁРТЫЙ",
+      "name": "Мост",
+      "chapters": [
+        "13_chapter13.md",
+        "14_chapter14.md",
+        "15_chapter15.md",
+        "16_chapter16.md"
+      ]
+    },
+    {
+      "label": "АКТ ПЯТЫЙ",
+      "name": "Долги",
+      "chapters": [
+        "17_chapter17.md",
+        "18_chapter18.md",
+        "19_chapter19.md",
+        "20_chapter20.md"
+      ]
+    },
+    {
+      "label": "ЭПИЛОГ",
+      "name": "",
+      "chapters": [
+        "21_epilogue.md"
+      ]
+    }
+  ],
+  "cover": "инструменты/cover.jpg",
+  "annotation": [
+    "Здесь — 80–150 слов аннотации: место и завязка, герои через то, что с ними происходит, без спойлеров.",
+    "Последняя строка — жанр и место в цикле. Первая книга цикла «Ветра»."
+  ],
+  "final_line": "КОНЕЦ ПЕРВОЙ КНИГИ",
+  "colophon": [
+    "{subtitle} цикла «{series}».",
+    "{edition} — текст в работе, возможны изменения.",
+    "Собрано {date}"
+  ],
+  "output_dir": "книги",
+  "basename": "Северный_ветер_бета_1.0",
+  "formats": [
+    "epub",
+    "fb2",
+    "mobi"
+  ],
+  "fragments": [
+    {
+      "until": "13_chapter13.md",
+      "basename": "Северный_ветер_фрагмент_главы_1-13",
+      "range_label": "пролог и главы 1–13",
+      "formats": [
+        "epub"
+      ],
+      "continuation": [
+        "На этом читательский фрагмент заканчивается.",
+        "Здесь — где остались герои и что висит: под эту точку обрыва, а не шаблоном.",
+        "Остальное — в полной книге."
+      ]
+    }
+  ],
+  "service_markers": {
+    "strip_blocks": [
+      "\\*\\((?:версия|монтаж)\\b.*?\\)\\*",
+      "<!--.*?-->"
+    ],
+    "strip_trailing": [
+      "\\*\\*КОНЕЦ (?:ГЛАВЫ[^*]*|ПРОЛОГА|ЭПИЛОГА)\\*\\*"
+    ]
+  },
+  "leak_patterns": [
+    "\\[\\[",
+    "XXX"
+  ],
+  "package": {
+    "name": "Северный_ветер_К1",
+    "include": {
+      "библии": [
+        "библии/*.md"
+      ],
+      "отчёты": [
+        "отчёты/*"
+      ]
+    }
+  },
+  "titles": {},
+  "numbering": {
+    "enabled": false,
+    "_": "true — сквозной счёт глав по порядку чтения вместо рабочих слотов"
+  },
+  "md": {
+    "illustrations": false,
+    "split": false
+  },
+  "default_mode": "reader",
+  "modes": {
+    "reader": {
+      "basename": "Северный_ветер_бета_1.0_beta",
+      "formats": [
+        "epub",
+        "fb2",
+        "md"
+      ],
+      "numbering": {
+        "enabled": true
+      },
+      "md": {
+        "illustrations": true,
+        "split": true
+      }
+    },
+    "working": {
+      "basename": "Северный_ветер_бета_1.0_alpha",
+      "formats": [
+        "epub"
+      ],
+      "numbering": {
+        "enabled": false
+      }
+    }
+  }
+}

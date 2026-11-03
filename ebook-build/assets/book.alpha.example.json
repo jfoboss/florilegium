@@ -1,0 +1,93 @@
+{
+  "_": "Пример: альфа второй книги цикла — читательский и рабочий режимы, плашка вместо ненаписанной главы, заметки над главами, «От автора», контрольные фразы. Поля, общие с book.example.json, здесь сокращены.",
+  "title": "Северный ветер",
+  "subtitle": "Книга вторая",
+  "author": "Автор Примерный",
+  "language": "ru",
+  "series": {
+    "name": "Ветра",
+    "index": 2
+  },
+  "genres_fb2": [
+    "sf_space",
+    "sf_detective"
+  ],
+  "chapters_dir": "главы",
+  "chapters": [
+    "01_chapter01_book2.md",
+    "02_chapter02_book2.md",
+    "15_chapter15_book2.md",
+    {
+      "stub": "Глава 16. Переправа",
+      "id": "16_stub",
+      "progress": 15,
+      "pov": "Анна / Пётр",
+      "loc": "Река, старый паром",
+      "description": "Анна и Пётр впервые переправляются через реку вместе и выясняют, кто из них знал о пароме заранее.",
+      "sources": "библия персонажей, раздел «Анна»"
+    },
+    "glava_paromshchik_v1_0.md",
+    "23_chapter23_book2_v0_3.md",
+    "25_chapter25_book2_v0_4.md",
+    "27_epilogue_book2.md"
+  ],
+  "title_subtitle": "merge",
+  "titles": {
+    "01_chapter01_book2.md": "Глава 1. Письмо",
+    "02_chapter02_book2.md": "Глава 2. Дорога",
+    "15_chapter15_book2.md": "Глава 15. Ярмарка",
+    "glava_paromshchik_v1_0.md": "Глава 17. Паромщик",
+    "23_chapter23_book2_v0_3.md": "Глава 23–24. Долго",
+    "25_chapter25_book2_v0_4.md": "Глава 25. Мост",
+    "27_epilogue_book2.md": "Эпилог. Сборы"
+  },
+  "cover": "инструменты/cover.png",
+  "annotation_file": "материалы/аннотация.md",
+  "final_line": "Конец второй книги.",
+  "service_markers": {
+    "extra_blocks": [
+      "(?m)^\\*Флэшбэк\\.(?:(?!\\n[ \\t]*\\n).)*?POV(?:(?!\\n[ \\t]*\\n).)*?\\*[ \\t]*$"
+    ]
+  },
+  "must_contain": [
+    {
+      "text": "Ветер всегда возвращается",
+      "chapter": "25_chapter25_book2_v0_4.md"
+    }
+  ],
+  "chapter_meta": {
+    "01_chapter01_book2.md": {
+      "status": "первый черновик",
+      "pov": "Анна",
+      "loc": "Город"
+    }
+  },
+  "output_dir": "книги",
+  "basename": "Северный_ветер",
+  "formats": [
+    "epub"
+  ],
+  "default_mode": "reader",
+  "modes": {
+    "reader": {
+      "basename": "Северный_ветер_бета",
+      "edition": "бета",
+      "formats": [
+        "epub",
+        "fb2",
+        "md"
+      ]
+    },
+    "working": {
+      "basename": "Северный_ветер_альфа",
+      "edition": "альфа-черновик",
+      "formats": [
+        "epub"
+      ],
+      "chapter_notes": {
+        "enabled": true
+      },
+      "foreword_file": "материалы/от_автора.md"
+    }
+  }
+}

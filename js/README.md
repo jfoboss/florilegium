@@ -3,11 +3,12 @@
 A hand port of the grown composition from Lua to plain JavaScript (ES5 in the bundle, no
 dependencies), made to put florilegium gardens into ePub books. Scope: theme `flora`, the
 page without a header, no animation, no initials. The SVG it writes is **byte for byte** the
-one `florilegium-svg.lua` writes for the same options.
+one `florilegium-svg.lua` writes for the same options. On top of the port, engine version 2
+adds chapter ornaments made with the same engine (they have no Lua counterpart).
 
 Why a port, when `web/` already runs the Lua in the browser through wasmoon: an ePub
 can't load a WebAssembly runtime from a CDN, and most e-readers run only a small subset of
-JS. The port is one self-contained file (`dist/florilegium-garden.js`, ~120 KB) that an
+JS. The port is one self-contained file (`dist/florilegium-garden.js`, ~135 KB) that an
 ePub ships next to its XHTML.
 
 ## How it is used in a book
@@ -25,9 +26,37 @@ With scripts off, or on any error, the image stays: the page works without the s
 <script src="florilegium-garden.js"></script>
 ```
 
-`data-florilegium` is `seed ink accent [season] [novisitors]`. The engine alone is
-`FlorilegiumGarden.page(options)`, with the options of `florilegium-svg.lua`'s `M.page`; it returns
-`{ svg }`.
+`data-florilegium` is `seed ink accent [season] [novisitors]`.
+
+A chapter carries a headpiece above its title and a tailpiece after its last paragraph, each a
+static image in an `<svg>` wrapper. `src/chapter.js` regrows the headpiece to the column width;
+in paginated mode it puts a quiet garden band (60 mm, sparser and paler than the headpiece)
+under the last paragraph if it fits on the page, otherwise the vignette stays. The headpiece
+is an 80 mm band that takes about a third of the page, and the chapter-end garden uses the
+same millimeters per pixel, so the flowers match. Here too the images are the fallback.
+
+```html
+<div class="ch-head"><svg data-florilegium-band="seed ink accent season [novisitors]" ...><image .../></svg></div>
+<div class="ch-tail"><svg data-florilegium-tail="seed ink accent season [novisitors]" ...><image .../></svg></div>
+```
+
+## The engine
+
+`FlorilegiumGarden` (`version: 2`); every function returns an SVG string, except `page`:
+
+- `page(options)` — the options of `florilegium-svg.lua`'s `M.page`; returns `{ svg }`.
+- `band({ seed, ink, accent, width, height = 80, season, visitors, id })` — the headpiece:
+  the grown garden on a low, wide `width × height` mm sheet, a narrow column on the left
+  and branches running right; the mask is lifted on all sides but the bottom.
+- `tailgarden({ seed, ink, accent, width, height, density = 0.6, intensity = 0.35, ... })` —
+  the chapter-end garden: the same, mirrored (column on the right), quieter by default.
+- `vignette({ seed, ink, accent, intensity = 0.35, id })` — the tailpiece, 70 × 26 mm: a
+  flower with curved stems both ways, buds at the ends, a copper sparkle.
+- `tile({ seed, ink, accent, wash = 0.3, id })` — the initial tile, 20 × 20 mm: a double
+  frame, a mottled wash and a vine; the middle stays free for the letter, which is live text.
+
+`ink` and `accent` are hex colors (`2456C4`, `B4662F`); `id` prefixes the SVG ids, so that
+several ornaments can share a page.
 
 ## Files
 
@@ -38,8 +67,10 @@ With scripts off, or on any error, the image stays: the page works without the s
 - `src/ink.js`, `src/flora.js`, `src/grow.js` — ports of `florilegium-ink.lua`, `florilegium-flora.lua`, `florilegium-grow.lua`.
 - `src/page.js` — TeX lengths, xcolor colors, the page layout, PDF operators to SVG
   (`florilegium-svg.lua`, `florilegium.lua`).
-- `src/shmuc.js` — the part-title script described above.
-- `tools/bundle.js` — everything in one file, `dist/florilegium-garden.js`.
+- `src/ornaments.js` — the chapter ornaments: `band`, `tailgarden`, `vignette`, `tile`.
+- `src/shmuc.js`, `src/chapter.js` — the part-title and chapter scripts described above.
+- `tools/bundle.js` — everything in one file, `dist/florilegium-garden.js`: the modules,
+  the `FlorilegiumGarden` object, then `shmuc.js` and `chapter.js`.
 - `tools/rewrite_pow.py` — rewrites `a ^ b` in Lua to `__pow(a, b)`, so the reference can
   use detmath's pow (Lua's `^` on numbers can't be overridden).
 - `lua/ref_page.lua` — the reference page: the repo's Lua with detmath swapped in.
@@ -56,6 +87,7 @@ They need `node`, `python3` and `texlua` (or any Lua 5.4: `LUA=lua5.4`).
     node test/flora_cross.js     # 186 cases, every primitive
     node test/page_cross.js      # 96 pages: formats, mirror, seasons, density — byte for byte
     node test/page_cross.js quick
+    node test/ornaments_smoke.js # the ornaments: well-formed SVG, deterministic (no Lua side)
 
 The reference with detmath grows the same garden as the original florilegium (glibc math)
 on seeds 1 and 8.

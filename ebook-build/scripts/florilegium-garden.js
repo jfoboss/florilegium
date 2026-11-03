@@ -1,5 +1,5 @@
-/*! florilegium-garden: сад florilegium на JS для ePub (порт с Lua, детерминированная математика).
- * Исходный движок: https://github.com/kevinraymond/florilegium
+/*! florilegium-garden: the florilegium garden in JS for ePub (a port of the Lua, deterministic math).
+ * Original engine: https://github.com/kevinraymond/florilegium. JavaScript port (c) 2026 jfoboss.
  * MIT License
  *
  * Copyright (c) 2026 Kevin Raymond
@@ -27,17 +27,19 @@ var defs = {}, cache = {};
 function req(n) { n = n.replace(/^\.\//, ""); if (cache[n]) return cache[n].exports;
   var m = { exports: {} }; cache[n] = m; defs[n](m, m.exports, req); return m.exports; }
 defs["detmath.js"] = function (module, exports, require) {
-// detmath.js — детерминированные sin, cos, atan2, log, exp, pow.
+// detmath.js — deterministic sin, cos, atan2, log, exp, pow.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
+// fdlibm: Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved. Developed at SunSoft, a Sun Microsystems, Inc. business. Permission to use, copy, modify, and distribute this software is freely granted, provided that this notice is preserved.
 //
-// Встроенные Math.sin/cos/pow/log в разных движках (V8, JavaScriptCore, glibc
-// у texlua) иногда расходятся в последнем бите. Сад растёт жадным алгоритмом,
-// и одна такая разница может увести ветку в другое место. Здесь функции
-// построены по алгоритмам fdlibm (Sun Microsystems, 1993) только из +, -, *, /
-// и сравнений, которые IEEE 754 предписывает считать одинаково везде, поэтому
-// результат — бит в бит одинаковый в любом движке. Копия на Lua — detmath.lua;
-// обе обязаны совпадать бит в бит (проверка — test/detmath_cross.js).
+// The built-in Math.sin/cos/pow/log of different engines (V8, JavaScriptCore, glibc
+// under texlua) sometimes differ in the last bit. The garden grows greedily,
+// and one such difference can send a branch somewhere else. Here the functions
+// follow the fdlibm algorithms (Sun Microsystems, 1993) using only +, -, *, /
+// and comparisons, which IEEE 754 requires to compute the same everywhere, so
+// the result is bit for bit the same in any engine. The Lua copy is detmath.lua;
+// the two must agree bit for bit (checked by test/detmath_cross.js).
 //
-// Не используются: Math.fround, FMA, битовые операции над double.
+// Not used: Math.fround, FMA, bit operations on doubles.
 "use strict";
 
 // ---------------------------------------------------------------- sin / cos
@@ -48,7 +50,7 @@ const C1 = 4.16666666666666019037e-02, C2 = -1.38888888888741095749e-03,
   C3 = 2.48015872894767294178e-05, C4 = -2.75573143513906633035e-07,
   C5 = 2.08757232129817482790e-09, C6 = -1.13596475577881948265e-11;
 const INVPIO2 = 6.36619772367581382433e-01;
-const PIO2_1 = 1.57079632673412561417e+00;    // первые 33 бита pi/2
+const PIO2_1 = 1.57079632673412561417e+00;    // first 33 bits of pi/2
 const PIO2_1T = 6.07710050650619224932e-11;   // pi/2 - PIO2_1
 
 function ksin(x) {
@@ -61,11 +63,11 @@ function kcos(x) {
   const r = z * (C1 + z * (C2 + z * (C3 + z * (C4 + z * (C5 + z * C6)))));
   return 1 - (0.5 * z - z * r);
 }
-// x = n*pi/2 + y, |y| <= pi/4 (Cody–Waite, двумя частями pi/2; точно для |x| < 2^20)
+// x = n*pi/2 + y, |y| <= pi/4 (Cody–Waite, pi/2 in two parts; exact for |x| < 2^20)
 function reduce(x) {
   const n = Math.floor(x * INVPIO2 + 0.5);
   const y = (x - n * PIO2_1) - n * PIO2_1T;
-  return [n - 4 * Math.floor(n / 4), y];      // квадрант 0..3
+  return [n - 4 * Math.floor(n / 4), y];      // quadrant 0..3
 }
 function sin(x) {
   if (x !== x || x === Infinity || x === -Infinity) return NaN;
@@ -122,7 +124,7 @@ function atan(x) {
 }
 const PI = 3.1415926535897931160e+00, PI_LO = 1.2246467991473531772e-16;
 const PI_O_2 = 1.5707963267948965580e+00;
-// atan2(y, x) = math.atan(y, x) в Lua 5.3
+// atan2(y, x) = math.atan(y, x) in Lua 5.3
 function atan2(y, x) {
   if (x !== x || y !== y) return NaN;
   if (x === 1) return atan(y);
@@ -148,7 +150,7 @@ function log(x) {
   if (x !== x || x < 0) return NaN;
   if (x === 0) return -Infinity;
   if (x === Infinity) return Infinity;
-  let k = 0;                                   // x = m * 2^k, m в [1, 2): деление на степени двойки точно
+  let k = 0;                                   // x = m * 2^k, m in [1, 2): dividing by powers of two is exact
   while (x >= TWO32) { x /= TWO32; k += 32; }
   while (x >= 2) { x /= 2; k += 1; }
   while (x < 2.3283064365386963e-10) { x *= TWO32; k -= 32; }   // 2^-32
@@ -166,7 +168,7 @@ const INVLN2 = 1.44269504088896338700e+00;
 const P1 = 1.66666666666666019037e-01, P2 = -2.77777777770155933842e-03,
   P3 = 6.61375632143793436117e-05, P4 = -1.65339022054652515390e-06,
   P5 = 4.13813679705723846039e-08;
-function pow2(k) {                             // 2^k для целого k — только точные умножения
+function pow2(k) {                             // 2^k for integer k: exact multiplications only
   let r = 1;
   if (k >= 0) { while (k >= 32) { r *= TWO32; k -= 32; } while (k > 0) { r *= 2; k -= 1; } }
   else { while (k <= -32) { r /= TWO32; k += 32; } while (k < 0) { r /= 2; k += 1; } }
@@ -181,15 +183,15 @@ function exp(x) {
   const t = r * r;
   const c = r - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
   const y = 1 - ((lo - (r * c) / (2 - c)) - hi);
-  if (k < -1000) return y * pow2(k + 1000) * pow2(-1000);   // без промежуточного нуля
+  if (k < -1000) return y * pow2(k + 1000) * pow2(-1000);   // no intermediate underflow to zero
   return y * pow2(k);
 }
 
-// x ^ y как в Lua (C pow) — но одинаково везде
+// x ^ y as in Lua (C pow), but the same everywhere
 function pow(x, y) {
   if (y === 0) return 1;
   if (x !== x || y !== y) return NaN;
-  if (Math.floor(y) === y && y >= -64 && y <= 64) {   // целая степень — перемножением
+  if (Math.floor(y) === y && y >= -64 && y <= 64) {   // integer power: by repeated multiplication
     let n = y < 0 ? -y : y, r = 1;
     for (let i = 0; i < n; i++) r *= x;
     return y < 0 ? 1 / r : r;
@@ -204,37 +206,38 @@ module.exports = { sin, cos, atan, atan2, log, exp, pow };
 
 };
 defs["fmt.js"] = function (module, exports, require) {
-// fmt.js — числа как их печатает Lua (C printf), бит в бит.
+// fmt.js — numbers as Lua (C printf) prints them, bit for bit.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 "use strict";
 
-// "%.Nf": printf печатает точное десятичное значение двоичного числа,
-// округлённое к ближайшему, а при точной середине — к чётному. Number.toFixed
-// округляет так же, кроме точной середины: там он берёт большее. Середина
-// возможна, только если x кратно 2^-(N+1) и x * 2^(N+1) нечётно —
-// это проверяется точно (умножение на степень двойки не теряет битов).
+// "%.Nf": printf prints the exact decimal value of the binary number,
+// rounded to nearest, ties to even. Number.toFixed rounds the same way
+// except on an exact tie, where it takes the larger. A tie is only
+// possible if x is a multiple of 2^-(N+1) and x * 2^(N+1) is odd;
+// this is checked exactly (multiplying by a power of two loses no bits).
 const P2 = [2, 4, 8, 16, 32, 64, 128];
 function fixed(x, n) {
-  if (x !== x) return "-nan";                 // как glibc для 0/0 в Lua
+  if (x !== x) return "-nan";                 // as glibc does for 0/0 in Lua
   if (x === Infinity) return "inf";
   if (x === -Infinity) return "-inf";
   if (x === 0) return (1 / x < 0 ? "-" : "") + (0).toFixed(n);
   const t = x * P2[n];                        // x * 2^(n+1)
   if (Number.isInteger(t) && Math.abs(t) % 2 === 1) {
-    // точная середина: |x| * 10^n = k + 1/2, берём чётное из k и k+1
+    // exact tie: |x| * 10^n = k + 1/2, take the even one of k and k+1
     const a = Math.abs(x);
-    const lo = a.toFixed(n);                  // toFixed дал k+1 (большее)
-    // k+1 в виде цифр без точки
+    const lo = a.toFixed(n);                  // toFixed gave k+1 (the larger)
+    // k+1 as digits without the point
     const digits = lo.replace(".", "");
     const last = +digits[digits.length - 1];
     let s = lo;
-    if (last % 2 === 1) {                     // k+1 нечётно -> чётное — это k
+    if (last % 2 === 1) {                     // k+1 is odd -> the even one is k
       s = decDown(lo);
     }
     return (x < 0 ? "-" : "") + s;
   }
   return x.toFixed(n);
 }
-// уменьшить десятичную запись на одну единицу последнего разряда ("0.3" -> "0.2", "1.0" -> "0.9")
+// decrease a decimal string by one unit in the last place ("0.3" -> "0.2", "1.0" -> "0.9")
 function decDown(s) {
   const ch = s.split("");
   for (let i = ch.length - 1; i >= 0; i--) {
@@ -252,10 +255,11 @@ module.exports = { fixed };
 
 };
 defs["ink.js"] = function (module, exports, require) {
-// ink.js — порт ink.lua (florilegium, Kevin Raymond, MIT): ядро рисования.
-// Геометрия считается здесь, на выходе — PDF-операторы строками, как у Lua,
-// бит в бит (сверка — test/ink_cross.js и сверка целой страницы).
-// Точки — массивы [x, y]; списки точек — обычные массивы с индексом от 0.
+// ink.js — a port of florilegium-ink.lua (florilegium, Kevin Raymond, MIT): the drawing core.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
+// Geometry is computed here; the output is PDF operators as strings, as in Lua,
+// bit for bit (cross-checked by test/ink_cross.js and the whole-page cross-check).
+// Points are [x, y] arrays; point lists are plain 0-indexed arrays.
 "use strict";
 const D = require("./detmath.js");
 const { fixed } = require("./fmt.js");
@@ -269,8 +273,8 @@ const M = {};
 M.CM = CM;
 
 // ---------------------------------------------------------------- random
-// mulberry32: шаг считается в 32-битной арифметике JS (Math.imul, >>> 0) —
-// то же, что 64-битные целые Lua с маской 0xffffffff.
+// mulberry32: the step runs in JS 32-bit arithmetic (Math.imul, >>> 0),
+// the same as Lua's 64-bit integers masked with 0xffffffff.
 function rng(seed) {
   let s = floor(seed) >>> 0;
   const r = {};
@@ -476,7 +480,7 @@ M.smooth = function (pts, closed, tension) {
   const n = pts.length;
   if (n < 3) return M.poly(pts, closed);
   const k = (tension === undefined || tension === null ? 1 : tension) / 6;
-  const at = (i) => closed ? pts[(((i - 1) % n) + n) % n] : pts[Math.max(1, Math.min(n, i)) - 1];   // i — индекс Lua
+  const at = (i) => closed ? pts[(((i - 1) % n) + n) % n] : pts[Math.max(1, Math.min(n, i)) - 1];   // i is a Lua index
   path.push(P(pts[0][0], pts[0][1]) + " m");
   const last = closed ? n : n - 1;
   for (let i = 1; i <= last; i++) {
@@ -514,7 +518,7 @@ M.flood = function (c, x0, y0, x1, y1) {
   M.fill(c);
 };
 
-// Вывод: Lua пишет литерал в узел TeX; здесь — в приёмник sink(s)
+// Output: Lua writes a literal into a TeX node; here it goes to the sink(s)
 let sink = null;
 M.set_sink = (fn) => { sink = fn; };
 function literal(parts) {
@@ -562,9 +566,9 @@ function normals(pts) {
 }
 M.normals = normals;
 
-// Lua: local s, L = ink.arclen(pts). Здесь — s (s[i] — длина до точки i, s[0] = 0),
-// полная длина — s.total: так вызов внутри списка аргументов, где Lua оставляет
-// только первое значение, тоже работает.
+// Lua: local s, L = ink.arclen(pts). Here: s (s[i] is the length up to point i, s[0] = 0),
+// the total length is s.total, so a call inside an argument list, where Lua keeps
+// only the first value, works too.
 M.arclen = function (pts) {
   const s = [0];
   let acc = 0;
@@ -606,7 +610,7 @@ M.taper = function (x0, y0, x1, y1, x2, y2, x3, y3, w0, w1) {
 
 M.catmull = function (pts, per) {
   const out = [], n = pts.length;
-  for (let i = 1; i <= n - 1; i++) {                      // i — индекс Lua
+  for (let i = 1; i <= n - 1; i++) {                      // i is a Lua index
     const p0 = pts[Math.max(i - 1, 1) - 1], p1 = pts[i - 1], p2 = pts[i], p3 = pts[Math.min(i + 2, n) - 1];
     for (let k = 0; k <= per - 1; k++) {
       const t = k / per; const t2 = t * t, t3 = t * t * t;
@@ -622,7 +626,7 @@ M.sample = function (f, n, v0, v1) {
   if (v0 === undefined || v0 === null) v0 = 0;
   if (v1 === undefined || v1 === null) v1 = 1;
   const out = [];
-  for (let i = 0; i <= n; i++) { const p = f(v0 + (v1 - v0) * i / n); out.push([p[0], p[1]]); }   // как { x, y } в Lua — новая точка
+  for (let i = 0; i <= n; i++) { const p = f(v0 + (v1 - v0) * i / n); out.push([p[0], p[1]]); }   // like { x, y } in Lua: a new point
   return out;
 };
 
@@ -634,7 +638,7 @@ M.bezier3 = function (x0, y0, x1, y1, x2, y2, x3, y3) {
   };
 };
 
-// Lua: local out, c, nrm = ink.blade(...). Здесь — out, а c и nrm — свойства out.c, out.nrm
+// Lua: local out, c, nrm = ink.blade(...). Here: out, with c and nrm as properties out.c, out.nrm
 M.blade = function (spine, n, wl, wr, edge) {
   const c = M.sample(spine, n);
   const nrm = normals(c);
@@ -673,10 +677,11 @@ module.exports = M;
 
 };
 defs["flora.js"] = function (module, exports, require) {
-// flora.js — порт flora.lua (florilegium, Kevin Raymond, MIT): примитивы сада.
-// Каждый примитив рисует в своей локальной системе (см) под текущим
-// преобразованием ink и берёт генератор rng. Перевод построчный: тот же порядок
-// вызовов генератора, те же выражения в том же порядке (иначе разойдутся биты).
+// flora.js — a port of florilegium-flora.lua (florilegium, Kevin Raymond, MIT): the garden primitives.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
+// Each primitive draws in its own local frame (cm) under the current ink
+// transform and takes an rng. Translated line by line: the same order of
+// generator calls, the same expressions in the same order (or the bits diverge).
 "use strict";
 const ink = require("./ink.js");
 const D = require("./detmath.js");
@@ -691,7 +696,7 @@ const M = {};
 const lerp = (a, b, t) => a + (b - a) * t;
 const lod = () => ink.unit();
 const ghost = () => ink.get_lift() > 0.3;
-// остаток от деления как в Lua 5.3 (luai_nummod): fmod, затем сдвиг к знаку делителя
+// modulo as in Lua 5.3 (luai_nummod): fmod, then shift toward the divisor's sign
 function lmod(a, b) {
   let m = a % b;
   if (m > 0 ? b < 0 : (m < 0 && b !== m)) m += b;
@@ -850,8 +855,8 @@ M.flower = function (rng, s, o) {
   ink.pop();
 };
 
-// Lua table.sort при различных ключах даёт тот же порядок, что и любая
-// корректная сортировка: ключи здесь — синусы случайных углов, совпадений нет.
+// With distinct keys Lua's table.sort gives the same order as any correct
+// sort: the keys here are sines of random angles, with no ties.
 M.lily = function (rng, s, o) {
   o = o || {};
   ink.push();
@@ -868,7 +873,7 @@ M.lily = function (rng, s, o) {
     ink.scale(1, tilt);
     ink.rotate(a - 90);
     ink.scale(rng.range(0.88, 1.05));
-    // поля таблицы в Lua вычисляются по порядку записи
+    // Lua evaluates table fields in the order written
     const w = rng.range(0.11, 0.14);
     const tn = t0 + 0.1 * back * -0.8 + rng.sym(0.03);
     const bend = (rng.chance(0.5) ? 1 : -1) * rng.range(0.04, 0.14);
@@ -1178,7 +1183,7 @@ function curl(rng, x, y, h0, L, side, t0, wbase) {
   const n = rng.int(11, 17);
   for (let k = 1; k <= n; k++) {
     const f = 0.18 + 0.82 * pow(k / n, 0.75);
-    const i = max(2, min(pts.length, floor(f * N + 1.5)));          // индекс Lua
+    const i = max(2, min(pts.length, floor(f * N + 1.5)));          // Lua index
     const sg = (k % 2 === 0) ? 1 : -1;
     const px = pts[i - 1][0], py = pts[i - 1][1];
     const stalk = lerp(0.1, 0.02, f) * rng.range(0.7, 1.2);
@@ -1199,7 +1204,7 @@ M.cyme = function (rng, L, o) {
   const t0 = rng.range(0.22, 0.36);
   const pts = curl(rng, 0, 0, 90 + rng.sym(10), L, side, t0, 0.026);
   if ((o.fork !== false) && rng.chance(o.fork ? 1 : 0.6)) {
-    const i = floor(pts.length * rng.range(0.25, 0.4));            // индекс Lua
+    const i = floor(pts.length * rng.range(0.25, 0.4));            // Lua index
     const a = pts[i], b = pts[i - 1];                               // Lua: pts[i + 1], pts[i]
     const h = D.atan2(a[1] - b[1], a[0] - b[0]) / rad;
     const h2 = h - side * rng.range(30, 50);
@@ -1389,7 +1394,7 @@ function wing(rng, pts, t0, rx, ry, spots, fine) {
   ink.smooth(pts, true); ink.clip();
   mottle(rng, -1.2, -1.2, 1.2, 1.2, fine ? 9 : 4, 0.14, t0 - 0.2, t0 + 0.2, fine ? 8 : 0);
   ink.smooth(pts, true); ink.stroke(tone(0.05), 0.26 * lod() * ink.CM, ghost() ? 0.25 : 0.55, true);
-  for (let i = 1; i <= pts.length; i++) {                 // индекс Lua
+  for (let i = 1; i <= pts.length; i++) {                 // Lua index
     const p = pts[i - 1];
     const f = rng.range(0.7, 0.88);
     const ex = rx + (p[0] - rx) * f, ey = ry + (p[1] - ry) * f;
@@ -1621,13 +1626,14 @@ module.exports = M;
 
 };
 defs["grow.js"] = function (module, exports, require) {
-// grow.js — порт grow.lua (florilegium, Kevin Raymond, MIT): выращенная композиция.
+// grow.js — a port of florilegium-grow.lua (florilegium, Kevin Raymond, MIT): the grown composition.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 //
-// Без анимации роста (события, расписание, кадры): странице книги она не нужна.
-// Все обращения к генераторам при этом на своих местах — включая те, что в Lua
-// стоят в аргументах анимационных вызовов и выполняются всегда (arrive(...)
-// у бабочек и пчёл): иначе после первой бабочки разошёлся бы весь сад.
-// Темы (geometric, math) и отметки из текста (\florilegiumbloom) не переносились.
+// No growth animation (events, schedule, frames): a book page does not need it.
+// All generator calls are still in place, including those that in Lua sit in the
+// arguments of animation calls and always run (arrive(...) for butterflies and
+// bees): otherwise the whole garden would diverge after the first butterfly.
+// Themes (geometric, math) and marks from the text (\florilegiumbloom) are not ported.
 "use strict";
 const ink = require("./ink.js");
 const flora = require("./flora.js");
@@ -1650,7 +1656,7 @@ const L_GHOST = 1, L_STEM = 2, L_LEAF = 3, L_AIRY = 4, L_BLOOM = 5, L_ACCENT = 6
 const GRID = 0.2, REACH = 3.0, SMALLEST = 0.36, FILLMIN = 0.17;
 
 // ---------------------------------------------------------------- motifs
-// (?? вместо or: summer = 0 у budding в Lua — это 0, а не «нет значения»)
+// (?? instead of or: summer = 0 for budding in Lua is 0, not "no value")
 const motifs = [
   { name: "flower", w: 3, smin: 0.75, smax: 1.3, max: 3, hard: true, layer: L_BLOOM, spring: 0.12, autumn: 0.45,
     r: (s) => 1.0 * s, off: (s) => 0, draw: (rng, s) => F.flower(rng, s) },
@@ -1705,7 +1711,7 @@ const motifs = [
     r: (s) => 1.05 * s, off: (s) => 0, draw: (rng, s) => F.seedhead(rng, s) },
   { name: "butterfly", w: 0.8, smin: 1.1, smax: 1.5, max: 2, hard: true, layer: L_ACCENT, fly: true,
     r: (s) => 0.5 * s, off: (s) => 0,
-    // на странице p = nil -> o = nil (без взмаха)
+    // on the page p = nil -> o = nil (no wingbeat)
     draw: (rng, s, p) => F.butterfly(rng, s, (p === undefined || p === null) ? undefined : { open: 0.3 + 0.7 * abs(cos(p * 5 * pi)) }) },
   { name: "bee", w: 0.8, smin: 0.7, smax: 0.85, max: 2, hard: true, layer: L_ACCENT, fly: true,
     r: (s) => 0.6 * s, off: (s) => 0, draw: (rng, s, p) => F.bee(rng, s, { trail: p === undefined || p === null }) },
@@ -1820,7 +1826,7 @@ function page(g) {
   const add_stem_points = function (pts, w0, w1, every) {
     if (every === undefined || every === null) every = 1;
     const n = pts.length;
-    for (let i = 1; i <= n; i += every) {                  // индекс Lua
+    for (let i = 1; i <= n; i += every) {                  // Lua index
       const a = pts[max(1, i - 1) - 1], b = pts[min(n, i + 1) - 1];
       const [tx, ty] = norm(b[0] - a[0], b[1] - a[1]);
       const p = pts[i - 1];
@@ -1870,7 +1876,7 @@ function page(g) {
       pts.push([x, y]);
       y = y + 0.25;
     }
-    mains[k] = pts;                                         // mains[1..NSTEM], как в Lua
+    mains[k] = pts;                                         // mains[1..NSTEM], as in Lua
     const w0 = k === 1 ? 0.085 : 0.065;
     stem(pts, w0, 0.028);
     add_stem_points(pts, w0, 0.028);
@@ -1994,7 +2000,7 @@ function page(g) {
     if (d > 1.0) {
       const nl = d > 2 ? 2 : 1;
       for (let j = 1; j <= nl; j++) {
-        const i = floor(pts.length * (0.25 + 0.3 * j / nl));    // индекс Lua
+        const i = floor(pts.length * (0.25 + 0.3 * j / nl));    // Lua index
         const p = pts[i - 1], q = pts[i];
         const a = deg(q[0] - p[0], q[1] - p[1]) + (j % 2 === 0 ? 1 : -1) * layout.range(40, 60);
         const ls = layout.range(0.45, 0.75);
@@ -2005,10 +2011,10 @@ function page(g) {
     return pts;
   };
 
-  // отметки из текста (\florilegiumbloom, заголовки) — только в TeX; здесь их нет
+  // marks from the text (\florilegiumbloom, headings) exist only in TeX; none here
 
   // ---------------------------------------------------------- visitors
-  const tangent = function (pts, i) {                      // i — индекс Lua
+  const tangent = function (pts, i) {                      // i is a Lua index
     const a = pts[max(1, i - 1) - 1], b = pts[min(pts.length, i + 1) - 1];
     return norm(b[0] - a[0], b[1] - a[1]);
   };
@@ -2020,8 +2026,8 @@ function page(g) {
       const pts = mains[k];
       const i = vis.int(max(10, floor(pts.length * 0.15)), max(11, floor(pts.length * 0.45)));
       const side = vis.chance(0.5) ? 1 : -1;
-      // за пределами эталона: на коротком стебле (низкий лист — заставка, конец главы)
-      // Lua упал бы на pts[i] = nil; здесь улитка просто не садится на этот стебель
+      // beyond the reference: on a short stem (a low sheet: headpiece, chapter end)
+      // Lua would fail on pts[i] = nil; here the snail simply skips this stem
       if (i > pts.length) continue;
       const [tx, ty] = tangent(pts, i);
       const nx = ty * side, ny = -tx * side;
@@ -2054,7 +2060,7 @@ function page(g) {
       const pts = mains[k];
       const i = vis.int(floor(pts.length * 0.25), floor(pts.length * 0.75));
       const p = pts[i - 1];
-      if (!p) continue;                                    // за пределами эталона, как у улитки
+      if (!p) continue;                                    // beyond the reference, as with the snail
       const dir = vis.chance(0.5) ? 1 : -1;
       const L = vis.range(1.2, 1.7);
       const ex = p[0] + dir * L, ey = p[1] + vis.range(0.05, 0.4);
@@ -2088,7 +2094,7 @@ function page(g) {
     let side = layout.chance(0.5) ? 1 : -1;
     let total = 0;
     for (let i = 2; i <= pts.length; i++) total = total + dist(pts[i - 1][0], pts[i - 1][1], pts[i - 2][0], pts[i - 2][1]);
-    for (let i = 2; i <= pts.length - 4; i++) {           // индекс Lua
+    for (let i = 2; i <= pts.length - 4; i++) {           // Lua index
       s = s + dist(pts[i - 1][0], pts[i - 1][1], pts[i - 2][0], pts[i - 2][1]);
       if (s >= acc) {
         const u = s / total;
@@ -2174,7 +2180,7 @@ function page(g) {
     nbranch = nbranch + 1;
     if (pick.fly) {
       const a = pick.name === "bee" ? layout.range(0, 360) : 90 + layout.sym(50);
-      // аргументы arrive(...) в Lua вычисляются и без анимации: два числа раскладки
+      // the arguments of arrive(...) in Lua are evaluated even without animation: two layout numbers
       layout.range(0, 360); layout.sym(0.8);
       place(pick.layer, px, py, a, () => pick.draw(rng.fork(), s));
     } else {
@@ -2200,7 +2206,7 @@ function page(g) {
         }
         if (bx !== null) {
           const ps = sea.range(0.4, 0.6), pa = sea.range(0, 360), pt = sea.range(0.36, 0.5);
-          sea.sym(0.6); sea.sym(0.3);                       // sway, x0 — только для анимации, но берутся всегда
+          sea.sym(0.6); sea.sym(0.3);                       // sway, x0: animation only, but always drawn
           place(L_BLOOM, bx, by, pa, () => { ink.scale(ps); F.petal(rng.fork(), { tone: pt, heart: false }); });
           disc(bx, by, 0.22, 1);
         }
@@ -2288,19 +2294,20 @@ module.exports = { page, motifs, regions, field };
 
 };
 defs["page.js"] = function (module, exports, require) {
-// page.js — порт нужной части svg.lua и florilegium.lua (florilegium, Kevin Raymond, MIT):
-// длины по-тексовски, цвета как их отдаёт xcolor, раскладка страницы, сад, SVG.
-// Только тема flora, лето по умолчанию, без шапки (head=false), без авторской страницы.
+// page.js — a port of the needed parts of florilegium-svg.lua and florilegium.lua (florilegium, Kevin Raymond, MIT):
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
+// TeX-style lengths, colors as xcolor gives them, page layout, garden, SVG.
+// Only the flora theme, default summer, no header (head=false), no author page.
 "use strict";
 const ink = require("./ink.js");
 const grow = require("./grow.js");
 const { fixed } = require("./fmt.js");
 
 const floor = Math.floor;
-const idiv = (a, b) => floor(a / b);          // целочисленное // Lua для неотрицательных
+const idiv = (a, b) => floor(a / b);          // Lua integer // for non-negatives
 const imod = (a, b) => a - floor(a / b) * b;
 
-// ---------------------------------------------------------------- длины (TeX scan_dimen)
+// ---------------------------------------------------------------- lengths (TeX scan_dimen)
 const UNITS = { pt: [1, 1], mm: [7227, 2540], cm: [7227, 254], in: [7227, 100], bp: [7227, 7200] };
 function sp(s) {
   s = String(s);
@@ -2325,7 +2332,7 @@ function sp(s) {
   return sign === "-" ? -n : n;
 }
 
-// ---------------------------------------------------------------- цвета как в xcolor
+// ---------------------------------------------------------------- colors as in xcolor
 function print_scaled(s) {
   const out = [String(idiv(s, 65536)), "."];
   let delta = 10;
@@ -2356,7 +2363,7 @@ function hex(r, g, b) {
   return "#" + [c(r), c(g), c(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 }
 const num = (t) => t.replace(/\.0$/, "");
-const fmtg = (x) => String(Number(x.toPrecision(6)));   // %g для долей 0..1
+const fmtg = (x) => String(Number(x.toPrecision(6)));   // %g for fractions 0..1
 
 function translate(stream, out, id) {
   let st = { fill: "#000000", stroke: "#000000", w: "1", op: 1, mult: false };
@@ -2418,7 +2425,7 @@ function translate(stream, out, id) {
         const m = /^\/flo([am])(\d+)$/.exec(args[n - 1]);
         if (!m) throw new Error("florilegium: unknown graphics state " + args[n - 1]);
         st.op = Number(m[2]) / 100; st.mult = m[1] === "m";
-      } else if (t === "J" || t === "j") { /* всегда round */ }
+      } else if (t === "J" || t === "j") { /* always round */ }
       else throw new Error("florilegium: cannot translate the PDF operator '" + t + "'");
       args = [];
     }
@@ -2427,7 +2434,7 @@ function translate(stream, out, id) {
   return out;
 }
 
-// ---------------------------------------------------------------- раскладка (florilegium.geometry)
+// ---------------------------------------------------------------- layout (florilegium.geometry)
 const SP_CM = 2.54 / (72.27 * 65536);
 function geometry(dimen) {
   const inch = 2.54;
@@ -2449,9 +2456,9 @@ function geometry(dimen) {
 const DEFAULTS = { paper: [ "210mm", "297mm" ], left: "68mm", right: "22mm", top: "32mm", bottom: "30mm",
   headsep: "8mm", headheight: "12pt", footskip: "30pt" };
 
-// o: seed (целое ≥ 1), paper [w, h] (длины) или "WxH" в мм, left right top bottom headsep headheight
+// o: seed (integer ≥ 1), paper [w, h] (lengths) or "WxH" in mm, left right top bottom headsep headheight
 // footskip, textend, season, density, intensity, visitors, ink, accent, background, id.
-// Возвращает { svg, g, stats }.
+// Returns { svg, g, stats }.
 function page(o) {
   o = Object.assign({}, o || {});
   for (const k of Object.keys(DEFAULTS)) if (o[k] === undefined || o[k] === null) o[k] = DEFAULTS[k];
@@ -2526,10 +2533,13 @@ module.exports = { page, sp, xcolor, html, translate, geometry };
 
 };
 defs["ornaments.js"] = function (module, exports, require) {
-// ornaments.js — украшения глав на движке florilegium: заставка (полоса сада над
-// названием), виньетка-концовка, плитка буквицы (без буквы: буква — живой текст).
-// Заставка — тот же выращенный сад (grow.lua через page.js) на низком широком листе;
-// виньетка и плитка — свои композиции из примитивов flora.
+// ornaments.js — chapter ornaments on the florilegium engine.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
+//
+// The headpiece (a garden band above the title), the tailpiece vignette, the initial
+// tile (no letter: the letter is live text).
+// The headpiece is the same grown garden (grow.lua through page.js) on a low, wide sheet;
+// the vignette and the tile are compositions of their own from the flora primitives.
 "use strict";
 const ink = require("./ink.js");
 const F = require("./flora.js");
@@ -2543,8 +2553,8 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const tone = ink.tone;
 const PT_MM = 25.4 / 72;
 
-// ---------------------------------------------------------------- рисунок в SVG
-// fn рисует в сантиметрах листа w×h (начало — левый нижний угол, y вверх)
+// ---------------------------------------------------------------- drawing to SVG
+// fn draws in centimeters on a w×h sheet (origin at the lower left corner, y up)
 function sheet(w, h, id, fn, o) {
   o = o || {};
   const streams = [];
@@ -2552,7 +2562,7 @@ function sheet(w, h, id, fn, o) {
   const [ir, ig, ib] = page.html(o.ink || "2456C4");
   const [ar, ag, ab] = page.html(o.accent || "B4662F");
   ink.set_ink(ir, ig, ib); ink.set_accent(ar, ag, ab);
-  // бледность — как intensity у florilegium: 1 — полный цвет, меньше — ближе к бумаге
+  // paleness, like florilegium's intensity: 1 is full color, less is closer to the paper
   const intensity = o.intensity === undefined ? 1 : o.intensity;
   const old = ink.set_pale(0.85 * (1 - Math.max(0, Math.min(1, intensity))));
   try {
@@ -2569,10 +2579,10 @@ function sheet(w, h, id, fn, o) {
   return out.join("\n");
 }
 
-// ---------------------------------------------------------------- заставка
-// Полоса W×H мм: узкая колонка слева (корни и главные стебли), остальное — «последняя
-// страница» без текста: ветви сада уходят вправо через всю полосу. Маска снята со всех
-// сторон, кроме нижней, чтобы края полосы не резали листья прямой линией.
+// ---------------------------------------------------------------- headpiece
+// A W×H mm band: a narrow column on the left (roots and main stems), the rest a "last
+// page" with no text: the garden's branches run right across the whole band. The mask is
+// lifted on all sides but the bottom, so the band's edges don't cut leaves in a straight line.
 function band(o) {
   const W = o.width, H = o.height || 80;
   const left = Math.max(22, Math.round(W * 0.2)), right = 4, top = 4, bottom = 6;
@@ -2601,11 +2611,11 @@ function unclip(svg, Wmm, Hmm, far) {
   return svg.replace(m[0], m[1] + rects.join("") + m[3]);
 }
 
-// ---------------------------------------------------------------- сад в конце главы
-// Полоса W×H мм под последним абзацем: тот же сад, но колонка справа (зеркально
-// заставке), ветви уходят влево.
-// По умолчанию — тихая полоса (решение автора, вариант D): реже и бледнее заставки,
-// в той же синей гамме. density и intensity — как у florilegium.
+// ---------------------------------------------------------------- chapter-end garden
+// A W×H mm band under the last paragraph: the same garden, but with the column on the
+// right (mirroring the headpiece), branches running left.
+// By default a quiet band (the author's choice, option D): sparser and paler than the
+// headpiece, in the same blue range. density and intensity as in florilegium.
 function tailgarden(o) {
   const W = o.width, H = o.height;
   const density = o.density === undefined ? 0.6 : o.density;
@@ -2618,10 +2628,10 @@ function tailgarden(o) {
   return unclip(r.svg, W, H, 60);
 }
 
-// ---------------------------------------------------------------- виньетка
-// Цветок в центре, от него в обе стороны изогнутые стебли с листочками,
-// бутон или соцветие на концах, медная искра над цветком.
-// Бледная, как полоса в конце главы (решение автора): intensity 0,35 по умолчанию.
+// ---------------------------------------------------------------- vignette
+// A flower in the center, curved stems with leaflets running from it both ways,
+// a bud or floret at the ends, a copper sparkle above the flower.
+// Pale, like the chapter-end band (the author's choice): intensity 0.35 by default.
 function vignette(o) {
   o = Object.assign({ intensity: 0.35 }, o);
   const W = 7, H = 2.6, cx = W / 2, cy = 1.15;
@@ -2636,7 +2646,7 @@ function vignette(o) {
       const pts = F.walk(cx + side * 0.25, cy - 0.05, h, L, 40);
       ink.layer(2);
       F.stem(pts, 0.045, 0.01, null, null, 0.3);
-      // листочки по стеблю, через один сверху и снизу
+      // leaflets along the stem, alternating above and below
       ink.layer(3);
       const nl = r.int(3, 4);
       for (let k = 1; k <= nl; k++) {
@@ -2650,7 +2660,7 @@ function vignette(o) {
         F.leaflet(r.fork(), { bend: -side * up * 0.2 });
         ink.pop();
       }
-      // соцветия на волосках у середины
+      // florets on hairlines near the middle
       ink.layer(5);
       const mid = pts[Math.floor(40 * r.range(0.45, 0.6))];
       for (let k = 1; k <= 2; k++) {
@@ -2661,7 +2671,7 @@ function vignette(o) {
         ink.layer(5);
         ink.push(); ink.translate(qx, qy); F.floret(r.fork(), 0.07 * r.range(0.85, 1.15)); ink.pop();
       }
-      // на конце бутон
+      // a bud at the end
       const e = pts[pts.length - 1], d = pts[pts.length - 3];
       const ae = D.atan2(e[1] - d[1], e[0] - d[0]) / rad;
       ink.push(); ink.translate(e[0], e[1]); ink.rotate(ae - 90); F.bud(r.fork(), 0.42); ink.pop();
@@ -2673,16 +2683,16 @@ function vignette(o) {
   }, o);
 }
 
-// ---------------------------------------------------------------- плитка буквицы
-// Квадрат S см: двойная рамка, бледная заливка пятнами, лоза от левого нижнего угла
-// вверх по левому краю и вдоль верхнего к правому верхнему, листочки, цветы в углах,
-// медная искра внизу справа. Середина свободна — там встанет буква.
+// ---------------------------------------------------------------- initial tile
+// An S cm square: a double frame, a pale mottled wash, a vine from the lower left corner
+// up the left edge and along the top to the upper right, leaflets, flowers in the corners,
+// a copper sparkle at the lower right. The middle is left free for the letter.
 function tile(o) {
   const S = 2;
   return sheet(S, S, o.id || ("flo" + o.seed + "i-"), () => {
     const rng = ink.rng(o.seed * 7919 + 409);
     const m = 0.05 * S;
-    // заливка
+    // wash
     ink.layer(1);
     ink.poly([[m, m], [S - m, m], [S - m, S - m], [m, S - m]], true);
     ink.fill(tone(0.9), o.wash === undefined ? 0.3 : o.wash);
@@ -2690,21 +2700,21 @@ function tile(o) {
     ink.clip();
     F.mottle(rng.fork(), m, m, S - m, S - m, 6, S * 0.12, 0.85, 0.95, 0);
     ink.unclip();
-    // рамка
+    // frame
     ink.layer(7);
     ink.poly([[m, m], [S - m, m], [S - m, S - m], [m, S - m]], true);
     ink.stroke(tone(0.05), 1.1);
     const n = m + 0.03 * S;
     ink.poly([[n, n], [S - n, n], [S - n, S - n], [n, S - n]], true);
     ink.stroke(tone(0.05), 0.35, 0.8);
-    // лоза
+    // vine
     const j = () => rng.sym(0.025 * S);
     const ctrl = [[0.14 * S + j(), 0.1 * S], [0.13 * S + j(), 0.36 * S + j()], [0.15 * S + j(), 0.64 * S + j()],
       [0.3 * S + j(), 0.84 * S + j()], [0.62 * S + j(), 0.85 * S + j()], [0.8 * S, 0.86 * S]];
     const pts = ink.catmull(ctrl, 8);
     ink.layer(2);
     F.stem(pts, 0.022 * S, 0.006 * S, tone(0.08));
-    // листочки по лозе — только внутрь (справа по ходу лозы), чтобы не лезли за рамку
+    // leaflets along the vine, inward only (to the right of its course), so they stay inside the frame
     ink.layer(3);
     const nl = rng.int(4, 5);
     for (let k = 1; k <= nl; k++) {
@@ -2716,16 +2726,16 @@ function tile(o) {
       const L = S * rng.range(0.1, 0.13) * (k % 2 === 0 ? 0.8 : 1);
       ink.push(); ink.translate(p[0], p[1]); ink.rotate(a - 90); ink.scale(L); F.leaflet(rng.fork(), { bend: -side * 0.2 }); ink.pop();
     }
-    // лист на конце лозы, в правом верхнем углу
+    // a leaf at the vine's end, in the upper right corner
     const e = pts[pts.length - 1], d = pts[pts.length - 3];
     ink.push(); ink.translate(e[0], e[1]); ink.rotate(D.atan2(e[1] - d[1], e[0] - d[0]) / rad - 90 + 25);
     ink.scale(0.15 * S); F.leaf(rng.fork(), { w: 0.28, depth: 0 }); ink.pop();
-    // цветы: в левом верхнем углу и внизу слева; соцветия по волоскам
+    // flowers: in the upper left corner and at the lower left; florets on hairlines
     ink.layer(5);
     ink.push(); ink.translate(0.2 * S, 0.8 * S); F.blossom(rng.fork(), 0.085 * S); ink.pop();
     ink.push(); ink.translate(0.24 * S, 0.17 * S); F.floret(rng.fork(), 0.05 * S, { star: rng.chance(0.5) }); ink.pop();
     ink.push(); ink.translate(0.5 * S, 0.9 * S); F.floret(rng.fork(), 0.04 * S); ink.pop();
-    // медная искра
+    // copper sparkle
     ink.layer(6);
     ink.push(); ink.translate(S - 0.15 * S, 0.17 * S); F.sparkle(rng.fork(), 0.045 * S); ink.pop();
   }, o);
@@ -2737,16 +2747,17 @@ module.exports = { band, tailgarden, vignette, tile, sheet, unclip };
 var O = req("ornaments.js");
 root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: O.tailgarden, vignette: O.vignette, tile: O.tile, version: 2 };
 })(typeof window !== "undefined" ? window : this);
-// shmuc.js — живой шмуцтитул: сад акта перерастает под формат страницы читалки.
+// shmuc.js — the live part-title page: the act's garden regrows to fit the e-reader page.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 //
-// Страница ePub несёт статичный сад (картинка в SVG-обёртке) и название акта.
-// Скрипт меряет страницу, выращивает сад с тем же seed на листе её пропорций
-// и ставит его вместо картинки. Если скрипты выключены или что-то сломалось,
-// остаётся картинка: страница целиком рабочая и без скрипта.
+// The ePub page carries a static garden (an image in an SVG wrapper) and the act title.
+// The script measures the page, grows a garden with the same seed on a sheet of its
+// proportions and puts it in place of the image. If scripts are off or something
+// breaks, the image stays: the page works fully without the script.
 //
-// Лист: высота всегда 200 мм, ширина — по пропорциям страницы. При пропорции
-// 120:200 это ровно тот лист, с которого снята статичная картинка, и сад тот же.
-// Поля в долях ширины, как у статичного листа (36/120 слева, 12/120 справа).
+// Sheet: height is always 200 mm, width follows the page proportions. At 120:200
+// this is exactly the sheet the static image was taken from, and the garden is the same.
+// Margins are fractions of the width, as on the static sheet (36/120 left, 12/120 right).
 (function () {
   "use strict";
   var F = window.FlorilegiumGarden;
@@ -2754,7 +2765,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
   var NS = "http://www.w3.org/2000/svg";
   var PT_MM = 25.4 / 72;
   var H = 200, TOP = 36, BOTTOM = 12, TEXTEND = 50;
-  var LABEL_Y = TOP + 22, RULE_Y = TOP + 27.5, NAME_Y = TOP + 36;   // как на статичном листе
+  var LABEL_Y = TOP + 22, RULE_Y = TOP + 27.5, NAME_Y = TOP + 36;   // as on the static sheet
 
   function sheet(w, h) {
     var a = Math.max(0.4, Math.min(1.6, w / h));
@@ -2763,8 +2774,8 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     return { W: W, left: left, right: right, textleft: left, textright: W - right };
   }
 
-  // маска сада: внешние стороны снимаются, чтобы листья у края листа не резались
-  // (как unclip в make_gardens.py); внутренние — граница зоны названия — остаются
+  // garden mask: outer sides are dropped so leaves at the sheet edge are not cut
+  // (like unclip in make_gardens.py); inner ones (the title zone border) stay
   function unclip(svg, s) {
     var Hpt = H / PT_MM, far = 120, edge = (s.textright - 10) / PT_MM;
     var re = /(<clipPath id="[^"]+"><path d=")([^"]+)("\/><\/clipPath>)/;
@@ -2811,7 +2822,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
       try {
         var len = t.getComputedTextLength();
         if (len > 2 * half) t.setAttribute("font-size", (size * 2 * half / len).toFixed(2));
-      } catch (e) { /* без измерения — как есть */ }
+      } catch (e) { /* cannot measure: leave as is */ }
     };
     if (label) { label.setAttribute("y", LABEL_Y); fit(label, 4.8); }
     if (rule) { rule.setAttribute("x1", x - 6); rule.setAttribute("x2", x + 6); rule.setAttribute("y1", RULE_Y); rule.setAttribute("y2", RULE_Y); }
@@ -2821,7 +2832,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
   function frame(el, s) {
     var b = null;
     try { b = el.getBBox(); } catch (e) { b = null; }
-    var x0 = -15, y0 = -15, x1 = s.W + 15, y1 = H + 15;      // не дальше 15 мм за лист
+    var x0 = -15, y0 = -15, x1 = s.W + 15, y1 = H + 15;      // at most 15 mm past the sheet
     if (b && b.width > 0) {
       x0 = Math.max(x0, b.x); y0 = Math.max(y0, b.y);
       x1 = Math.min(x1, b.x + b.width); y1 = Math.min(y1, b.y + b.height);
@@ -2830,8 +2841,8 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     el.setAttribute("viewBox", [x0 - p, y0 - p, x1 - x0 + 2 * p, y1 - y0 + 2 * p].map(function (v) { return v.toFixed(2); }).join(" "));
   }
 
-  // Страница читалки: ширина — колонка, в которой стоит сад (в развороте это
-  // одна страница, а не оба окна), высота — окно без полей сверху и снизу.
+  // E-reader page: width is the column holding the garden (in a spread that is
+  // one page, not the whole window), height is the window minus top and bottom margins.
   function measure(el) {
     var box = el.parentNode && el.parentNode.getBoundingClientRect ? el.parentNode.getBoundingClientRect() : null;
     var w = box && box.width > 80 ? box.width : document.documentElement.clientWidth || window.innerWidth;
@@ -2857,7 +2868,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
       el.setAttribute("data-florilegium-sheet", s.W + "x" + H);
       done[i] = s.W;
     }
-    // лист вписывается в страницу целиком (meet), а не растягивается по ширине
+    // the sheet fits the page whole (meet) rather than stretching to the width
     el.style.width = "100%";
     el.style.height = Math.floor(m.h) + "px";
     return true;
@@ -2873,7 +2884,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
 
   var tries = 0, timer = null;
   function start() {
-    // читалка может показать страницу раньше, чем у неё появится размер
+    // the e-reader may show the page before it has a size
     var el = document.querySelector("svg[data-florilegium]");
     if (!el) return;
     var m = measure(el);
@@ -2891,26 +2902,28 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
   else window.addEventListener("load", function () { setTimeout(start, 30); });
 })();
 
-// chapter.js — живые украшения главы: заставка перерастает под ширину колонки,
-// в постраничном режиме под последним абзацем — тихая полоса сада (60 мм, реже и
-// бледнее заставки), если она помещается на страницу; иначе остаётся виньетка.
+// chapter.js — live chapter ornaments: the headpiece regrows to the column width.
+// Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 //
-// Разметка (её пишет сборщик):
+// In paginated mode, a quiet garden band (60 mm, sparser and paler than the headpiece)
+// goes under the last paragraph if it fits on the page; otherwise the vignette stays.
+//
+// Markup (written by the book builder):
 //   <div class="ch-head"><svg data-florilegium-band="seed ink accent season [novisitors]" ...><image .../></svg></div>
 //   <div class="ch-tail"><svg data-florilegium-tail="seed ink accent season [novisitors]" ...><image .../></svg></div>
-// Картинки внутри — запаска: без скрипта или при ошибке остаются они.
+// The images inside are the fallback: without the script, or on an error, they stay.
 //
-// Масштаб один на всю книгу: заставка — полоса высотой 80 мм, которая на экране
-// занимает около трети страницы; тем же числом миллиметров на пиксель меряется
-// сад в конце главы, чтобы цветы были одного размера сверху и снизу.
+// One scale for the whole book: the headpiece is an 80 mm high band that takes about a
+// third of the screen page; the chapter-end garden is measured with the same millimeters
+// per pixel, so the flowers are the same size at the top and at the bottom.
 (function () {
   "use strict";
   var F = window.FlorilegiumGarden;
   if (!F || !F.band || !window.DOMParser || !document.querySelector) return;
   var NS = "http://www.w3.org/2000/svg";
   var PT_MM = 25.4 / 72;
-  var BAND_H = 80, BAND_SHARE = 0.3;     // мм; доля высоты страницы
-  var TAIL_H = 60;                       // мм: тихая полоса в конце главы; не влезает — виньетка
+  var BAND_H = 80, BAND_SHARE = 0.3;     // mm; share of the page height
+  var TAIL_H = 60;                       // mm: the quiet chapter-end band; if it doesn't fit, the vignette
 
   function data(el, attr) {
     var d = el.getAttribute(attr).split(" ");
@@ -2921,7 +2934,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
   }
 
   function inset() {
-    // поле читалки сверху: где начинается первый блок страницы
+    // the e-reader's top margin: where the page's first block starts
     var first = document.body && document.body.firstElementChild;
     var t = first ? first.getBoundingClientRect().top : 0;
     var vh = window.innerHeight || document.documentElement.clientHeight;
@@ -2972,7 +2985,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     return [x0 - pad, y0 - pad, x1 - x0 + 2 * pad, y1 - y0 + 2 * pad];
   }
 
-  // ---------------------------------------------------------- заставка
+  // ---------------------------------------------------------- headpiece
   var heads = {};
   function head(el, i) {
     var box = el.parentNode.getBoundingClientRect();
@@ -2991,13 +3004,13 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     heads[i] = W;
   }
 
-  // ---------------------------------------------------------- конец главы
+  // ---------------------------------------------------------- chapter end
   var tails = {};
   function tail(el, i) {
     var box = el.parentNode;
     var vh = window.innerHeight || document.documentElement.clientHeight;
     var ph = pageHeight(), top = inset();
-    // сначала — виньетка, как без скрипта: от её места и меряем остаток
+    // first the vignette, as without the script: the space left is measured from its place
     if (tails[i]) {
       restore(el, "flo-tail");
       el.setAttribute("viewBox", tails[i].vb);
@@ -3008,10 +3021,10 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     if (!paginated()) return;
     var r = box.getBoundingClientRect();
     var rest = vh - top - r.top - 6;
-    var k = BAND_H / (BAND_SHARE * ph);              // мм на пиксель — как у заставки
+    var k = BAND_H / (BAND_SHARE * ph);              // mm per pixel, as for the headpiece
     if (rest * k < TAIL_H + 4) return;
-    // ширина колонки: у развёрнутого на всю колонку блока концовки (у body в
-    // постраничном режиме прямоугольник охватывает все колонки сразу)
+    // column width: from the tailpiece block stretched to the full column (in paginated
+    // mode the body's rectangle spans all the columns at once)
     box.classList.add("ch-tail-garden");
     var colW = box.getBoundingClientRect().width;
     rest = vh - top - box.getBoundingClientRect().top - 6;
@@ -3020,7 +3033,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     var vbOld = el.getAttribute("viewBox");
     var g = parse(F.tailgarden(Object.assign(data(el, "data-florilegium-tail"), { width: W, height: H, id: "flo-t" + i + "s" + W + "x" + H + "-" })), "flo-tail");
     swap(el, g, "flo-tail");
-    // вписать по рисунку: снятая маска пускает листья за край листа
+    // fit to the drawing: the lifted mask lets leaves run past the sheet's edge
     var vb = bboxView(el, W, H, 1);
     el.setAttribute("viewBox", vb.map(function (v) { return v.toFixed(2); }).join(" "));
     el.setAttribute("preserveAspectRatio", "xMidYMin meet");

@@ -398,6 +398,9 @@ function page(g) {
       const pts = mains[k];
       const i = vis.int(max(10, floor(pts.length * 0.15)), max(11, floor(pts.length * 0.45)));
       const side = vis.chance(0.5) ? 1 : -1;
+      // beyond the reference: on a short stem (a low sheet: headpiece, chapter end)
+      // Lua would fail on pts[i] = nil; here the snail simply skips this stem
+      if (i > pts.length) continue;
       const [tx, ty] = tangent(pts, i);
       const nx = ty * side, ny = -tx * side;
       const f = free_at(pts[i - 1][0] + nx * 0.8 * s, pts[i - 1][1] + ny * 0.8 * s);
@@ -429,6 +432,7 @@ function page(g) {
       const pts = mains[k];
       const i = vis.int(floor(pts.length * 0.25), floor(pts.length * 0.75));
       const p = pts[i - 1];
+      if (!p) continue;                                    // beyond the reference, as with the snail
       const dir = vis.chance(0.5) ? 1 : -1;
       const L = vis.range(1.2, 1.7);
       const ex = p[0] + dir * L, ey = p[1] + vis.range(0.05, 0.4);

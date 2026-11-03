@@ -1,11 +1,11 @@
--- Draw one primitive as a standalone SVG through svg.lua's translator (the playground's ornaments):
+-- Draw one primitive as a standalone SVG through florilegium-svg.lua's translator (the playground's ornaments):
 --   texlua tools/ornament.lua hedera 1.2 web/hedera.svg   and   ... sparkle 0.5 web/sparkle.svg
 package.path = "./?.lua;" .. package.path
 local streams = {}
 tex = { sprint = function() end }
 luatexbase = { registernumber = function() return 0 end }
 node = { new = function() return {} end, write = function(n) streams[#streams + 1] = n.data end }
-local ink, flora, svg = require("ink"), require("flora"), require("svg")
+local ink, flora, svg = require("florilegium-ink"), require("florilegium-flora"), require("florilegium-svg")
 ink.set_accent(0.70589, 0.4, 0.18431)
 local name, size, out = arg[1], tonumber(arg[2]), arg[3]
 ink.set_transform({ ink.CM, 0, 0, ink.CM, 200, 200 })

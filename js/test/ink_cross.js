@@ -1,4 +1,4 @@
-// Cross-check of ink.js against the reference ink.lua (+ detmath); mirrors test/ink_case.lua.
+// Cross-check of ink.js against the reference florilegium-ink.lua (+ detmath); mirrors test/ink_case.lua.
 "use strict";
 const { LUA, refdir } = require("./ref.js");
 const fs = require("fs");

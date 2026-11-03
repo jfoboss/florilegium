@@ -1,4 +1,4 @@
--- grow.lua -- the grown composition of florilegium (LuaLaTeX only).
+-- florilegium-grow.lua -- the grown composition of florilegium (LuaLaTeX only).
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
 -- A plant, not a packing. Everything grows from one root in the bottom-left
@@ -21,9 +21,10 @@
 -- Proxies (discs) may overlap a little, so leaves tuck under flowers.
 -- Everything is deterministic for a given seed.
 
-local ink = require("ink")
-local flora = require("flora")
+local ink = require("florilegium-ink")
+local flora = require("florilegium-flora")
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 -- the primitives of the current theme: flora itself, or a theme's own in front
 -- of it (see M.theme); every primitive in this file is called through F
 local F = flora
@@ -131,7 +132,7 @@ local motifs = {
 M.layers = { ghost = L_GHOST, stem = L_STEM, leaf = L_LEAF, airy = L_AIRY, bloom = L_BLOOM, accent = L_ACCENT }
 
 -- ---------------------------------------------------------------- themes
--- A theme (theme-<name>.lua) replaces primitives by name and may reweight or
+-- A theme (florilegium-theme-<name>.lua) replaces primitives by name and may reweight or
 -- add motif rows. It returns { flora = { name = fn, ... }, motifs = fn(rows, F) }:
 -- rows are copies of the rows above (keep their names; w = 0 retires one), F
 -- the theme's primitives with flora's behind them. Everything here draws
@@ -140,14 +141,35 @@ M.layers = { ghost = L_GHOST, stem = L_STEM, leaf = L_LEAF, airy = L_AIRY, bloom
 -- which M.page hands the page to. No theme (nil, "" or "flora") is the garden
 -- as it always was.
 local base, themes, composition = motifs, {}, nil
+
+-- A theme is the module florilegium-theme-<name>. A theme written before the modules
+-- had the prefix, theme-<name>.lua, still loads, with a warning. Only a missing file
+-- falls back to the old name; an error inside a theme is reported as it is.
+local function load_theme(name)
+  local new, old = "florilegium-theme-" .. name, "theme-" .. name
+  local function missing(err, mod) return tostring(err):find("module '" .. mod .. "' not found", 1, true) end
+  local ok, t = pcall(require, new)
+  if ok then return t end
+  if not missing(t, new) then error("florilegium: theme '" .. name .. "': " .. tostring(t), 0) end
+  local ok_old, t_old = pcall(require, old)
+  if ok_old then
+    if texio then
+      texio.write_nl("florilegium warning: theme '" .. name .. "' came from " .. old .. ".lua; rename it "
+        .. new .. ".lua, the old name will stop working in a later version")
+    end
+    return t_old
+  end
+  if not missing(t_old, old) then error("florilegium: theme '" .. name .. "': " .. tostring(t_old), 0) end
+  error("florilegium: no theme '" .. name .. "' (" .. new .. ".lua): " .. tostring(t), 0)
+end
+
 function M.theme(name)
   if name == nil or name == "" or name == "flora" then
     F, motifs, composition = flora, base, nil
   else
     local th = themes[name]
     if not th then
-      local ok, t = pcall(require, "theme-" .. name)
-      if not ok then error("florilegium: no theme '" .. name .. "' (theme-" .. name .. ".lua): " .. tostring(t), 0) end
+      local t = load_theme(name)
       local tf = setmetatable({}, { __index = flora })
       for k, fn in pairs(t.flora or {}) do tf[k] = fn end
       local rows = {}
@@ -1020,7 +1042,7 @@ function M.page(g)
     texio.write_nl(string.format("florilegium: grew %d cells, %d motifs, %d stem points, %.0f KB; visitors: %s",
       #gx, n, #spts, bytes / 1024, #seen > 0 and table.concat(seen, ", ") or "none"))
   end
-  -- what grew, for a page that describes its own garden (svg.lua and the playground)
+  -- what grew, for a page that describes its own garden (florilegium-svg.lua and the playground)
   return { stats = { motifs = n, counts = counts, stems = #spts, cells = #gx } }
 end
 

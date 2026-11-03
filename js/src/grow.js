@@ -1,4 +1,4 @@
-// grow.js — a port of grow.lua (florilegium, Kevin Raymond, MIT): the grown composition.
+// grow.js — a port of florilegium-grow.lua (florilegium, Kevin Raymond, MIT): the grown composition.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 //
 // No growth animation (events, schedule, frames): a book page does not need it.

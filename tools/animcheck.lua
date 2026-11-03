@@ -10,7 +10,7 @@ luatexbase = { registernumber = function() return 0 end }
 local out
 node = { new = function() return {} end, write = function(n) out = n.data end }
 package.path = "./?.lua;" .. package.path
-local ink, grow = require("ink"), require("grow")
+local ink, grow = require("florilegium-ink"), require("florilegium-grow")
 
 -- an A4 page with a 68 mm left margin, roughly as in the demo documents
 local CASES = {

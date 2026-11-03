@@ -1,4 +1,4 @@
--- authored.lua -- the authored composition of florilegium.
+-- florilegium-authored.lua -- the authored composition of florilegium.
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
 -- Everything here is placed by hand, for A4 with a 68 mm left margin (the
@@ -7,12 +7,13 @@
 -- length, and motifs at chosen points, each joined to a chosen stem by a
 -- branch. Only the parameters are sampled (every petal, lobe and vein, and a
 -- jitter of a millimeter or two on the control points), so every page gets
--- the same garden, differently painted. The grown composition (grow.lua)
+-- the same garden, differently painted. The grown composition (florilegium-grow.lua)
 -- uses the same primitives and the same motif table.
 
-local ink = require("ink")
-local grow = require("grow")
+local ink = require("florilegium-ink")
+local grow = require("florilegium-grow")
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 
 local sqrt, cos, sin, atan, pi, max, min, floor = math.sqrt, math.cos, math.sin, math.atan, math.pi, math.max, math.min, math.floor
 local rad = pi / 180

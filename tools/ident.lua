@@ -10,7 +10,7 @@ luatexbase = { registernumber = function() return 0 end }
 local out
 node = { new = function() return {} end, write = function(n) out = n.data end }
 package.path = "./?.lua;" .. package.path
-local ink, grow, authored = require("ink"), require("grow"), require("authored")
+local ink, grow, authored = require("florilegium-ink"), require("florilegium-grow"), require("florilegium-authored")
 local dir = assert(arg[1], "usage: texlua tools/ident.lua <directory>")
 os.execute("mkdir -p " .. dir)
 local CASES = {

@@ -8,14 +8,17 @@
 % florilegium.ps -- a Delft-blue floral page margin, grown by the PostScript
 % interpreter that prints it. No images and no precomputed paths: every petal,
 % leaf and stem below is computed from a seed while the page is interpreted.
-% It is a port of florilegium's Lua (ink.lua, flora.lua, grow.lua) to PostScript.
+% It is a port of florilegium's Lua (florilegium-ink.lua, florilegium-flora.lua, florilegium-grow.lua) to PostScript.
 %
 %   gs -dALLOWPSTRANSPARENCY -dSeed=7 -sDEVICE=pdfwrite -o garden.pdf florilegium.ps
 %   gs -dALLOWPSTRANSPARENCY -dSeed=7 -sDEVICE=png16m -r100 -dGraphicsAlphaBits=4 -o page-%d.png florilegium.ps
 %
-% -dSeed=N picks the garden (any positive integer; without it the clock picks
-% one, so every print grows a new garden), -dAge=0..1 the season (0 spring,
-% 0.5 summer, 1 autumn), -dNoVisitors leaves out butterflies, bees, snail, bird.
+% -dSeed=N picks the garden (1 to 250000; a larger seed wraps around), and
+% without one the interpreter's clock picks it, so every print grows a new
+% garden. -dAge=0..1 sets the season (0 spring, 0.5 summer, 1 autumn), and
+% -dNoVisitors leaves out the butterflies, bees, snail and bird. A printer
+% takes no -d options: add a line such as /Seed 7 def after the first line.
+% postscript/README.md in the repository (below) has more; check.sh tests it.
 %
 % Transparency: PostScript has none, and the watercolor look lives on it
 % (washes multiplied over washes, white streaks lifted out). Ghostscript
@@ -48,9 +51,12 @@
 % SOFTWARE.
 
 % ---------------------------------------------------------------- settings
+% -dName=value arrives as a number, -dName alone as true, -sName=value as a
+% string; main reads each through optnum or optbool, so any of them works.
 /Seed where { pop } { /Seed 0 def } ifelse
 /Age where { pop } { /Age -1 def } ifelse
 /NoVisitors where { pop } { /NoVisitors false def } ifelse
+/FloCheck where { pop } { /FloCheck false def } ifelse
 
 /florilegium 900 dict def
 florilegium begin
@@ -1656,11 +1662,61 @@ florilegium begin
   DEF setmatrix CM dup scale } bind def
 /endpage { /.poppdf14devicefilter where { pop .poppdf14devicefilter } if showpage } bind def
 
+% The clock, when no seed is given. Ghostscript's realtime counts milliseconds
+% from the interpreter's start (about 20 by the time this runs), so alone it
+% picks one of a handful of gardens. The %Calendar% device of Level 2 has the
+% date and time to the second; an interpreter without one (or with its clock
+% not running) falls back to realtime, whose origin each interpreter chooses.
+/clockseed {                                               % -> seed in 1..99991
+  mark { (%Calendar%) currentdevparams } stopped { cleartomark null } { exch pop } ifelse
+  dup type /dicttype eq { dup /Running known { dup /Running get } { false } ifelse } { false } ifelse
+  { 0 exch [ /Year /Month /Day /Hour /Minute /Second ]
+    { 1 index exch get 3 -1 roll 61 mul add 99991 mod exch } forall pop }
+  { pop realtime abs 99991 mod } ifelse
+  1 add } bind def
+
+% Options. A number may come as an integer, a real or a string of digits;
+% anything else (true from a bare -dSeed or -dAge) counts as not given.
+/optnum {                                                  % value default -> number
+  exch dup type /stringtype eq
+  { mark exch { token { exch pop } { null } ifelse } stopped { cleartomark null } { exch pop } ifelse } if
+  dup type dup /integertype eq exch /realtype eq or { exch } if pop } bind def
+/optbool { dup type /booleantype ne { 0 optnum 0 ne } if } bind def   % value -> bool
+% Seeds stay at or below SEEDMAX so that seed * 7919 (+ 7907 a page) fits in
+% 32 bits: an interpreter with 32-bit integers, the size the PostScript
+% reference gives them, turns a larger product into a single-precision real,
+% which would grow a different garden from the same seed than Ghostscript's
+% 64-bit integers do.
+/SEEDMAX 250000 def
+/seedof {                                                  % option -> 0 (none: the clock) or 1..SEEDMAX
+  0 optnum abs
+  dup 2147483647 gt { dup SEEDMAX div floor SEEDMAX mul sub abs floor dup 0 eq { pop SEEDMAX } if } if
+  cvi dup 0 ne { 1 sub SEEDMAX mod 1 add } if } bind def
+
+% -dFloCheck adds a line to stderr after each page with a checksum of all it
+% painted (the captured layers, before they run): numbers to 0.01, operators
+% and names by their text. check.sh compares it with expected.txt.
+/SUM 0 def /SBUF 64 string def
+/sumin { SUM 61 mul add 33554393 mod dup 0 lt { 33554393 add } if /SUM exch store } bind def   % int ->
+/sumof {                                                   % any ->
+  dup type dup /integertype eq exch /realtype eq or { 100 mul round cvi sumin } {
+  dup type dup /arraytype eq exch /packedarraytype eq or { dup length sumin { sumof } forall } {
+  SBUF cvs { sumin } forall } ifelse } ifelse } bind def
+/sumlayers { CHECK {
+  LAYERS { dup null ne { dup /a get exch /n get 0 exch getinterval { sumof } forall } { pop } ifelse } forall
+  } if } bind def
+/sumline { CHECK {
+  (%stderr) (w) file dup (florilegium: page ) writestring dup page SBUF cvs writestring
+  dup ( drawing ) writestring dup SUM SBUF cvs writestring (\n) writestring } if } bind def
+
 /main {
-  /SEED Seed cvi abs dup 0 eq { pop realtime abs 99991 mod 1 add } if store
+  /SEED Seed seedof dup 0 eq { pop clockseed } if store
+  /AGE Age -1 optnum dup 0 lt { pop -1 } { 0 1 clamp } ifelse store
+  /VISIT NoVisitors optbool not store
+  /CHECK FloCheck optbool store
   DOC
   1 1 PG { /page exch store
-    startpage
+    startpage /SUM 0 store
     /gseed SEED page 1 sub 7907 mul add store
     /lasty 1e30 store 0 1 NL 1 sub { LINES exch get dup 0 get page eq { 2 get lasty min /lasty exch store } { pop } ifelse } for
     <<
@@ -1668,15 +1724,17 @@ florilegium begin
       /colright COLRIGHT /headrule HEADRULE /footy FOOTY
       /spill page PG eq { 1 } { 0 } ifelse /spilly lasty 3 sub CM div
       /marks [ 0 1 NM 1 sub { MARKS exch get dup 0 get page eq { 1 2 getinterval } { pop } ifelse } for ]
-      /age Age 0 lt { -1 } { Age 0 1 clamp } ifelse /visitors NoVisitors not
+      /age AGE /visitors VISIT
     >> growpage
-    paintlayers
-    gseed 3 add R.new pagehead paintlayers
+    sumlayers paintlayers
+    gseed 3 add R.new pagehead sumlayers paintlayers
     page paintlines
     page 1 gt { runninghead } if
     page folio
+    sumline
     endpage } for } bind def
 /SEED 1 def /page 1 def /gseed 1 def /lasty 0 def
+/AGE -1 def /VISIT true def /CHECK false def
 
 end   % florilegium
 

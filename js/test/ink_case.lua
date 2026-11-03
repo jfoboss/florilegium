@@ -1,4 +1,4 @@
--- The ink cross-check script: Lua side (reference ink.lua + detmath).
+-- The ink cross-check script: Lua side (reference florilegium-ink.lua + detmath).
 -- texlua ink_case.lua <ref-dir> <out.txt>
 local refdir, out = arg[1], arg[2]
 local here = arg[0]:match("^(.*)[/\\]") or "."
@@ -12,7 +12,7 @@ tex = { sprint = function() end }
 luatexbase = { registernumber = function() return 0 end }
 node = { new = function() return {} end, write = function(n) streams[#streams + 1] = n.data end }
 
-local ink = require("ink")
+local ink = require("florilegium-ink")
 local L = {}
 local function hx(x) return (string.pack(">d", x):gsub(".", function(c) return string.format("%02x", c:byte()) end)) end
 local function emit(tag, ...) local t = { tag } for _, v in ipairs({ ... }) do t[#t + 1] = type(v) == "number" and hx(v) or tostring(v) end L[#L + 1] = table.concat(t, " ") end

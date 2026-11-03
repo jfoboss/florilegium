@@ -14,6 +14,13 @@ await page.setViewport({ width: 1440, height: 900 })
 const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+// everything the page fetches from another origin; only the files pinned with a hash in
+// web/*.js may be (the worker's own fetches don't show here: it checks wasmoon's hashes itself)
+const offsite = new Set()
+page.on('request', (r) => { const u = new URL(r.url()); if (/^https?:$/.test(u.protocol) && u.origin !== new URL(BASE).origin) offsite.add(r.url()) })
+const web = new URL('../../web/', import.meta.url)
+const pinned = new Set(fs.readdirSync(web).filter((f) => f.endsWith('.js'))
+  .flatMap((f) => [...fs.readFileSync(new URL(f, web), 'utf8').matchAll(/\['(https:[^']+)', 'sha384-[^']+'\]/g)].map((m) => m[1])))
 const results = []
 const check = (name, ok, detail = '') => { results.push([ok ? 'pass' : 'FAIL', name, detail]) }
 
@@ -262,6 +269,7 @@ await page.click('[data-seen=""]')
   await p2.close()
 }
 check('no errors in the console', errors.length === 0, errors.join(' | '))
+check('nothing from elsewhere but the pinned files', pinned.size > 0 && [...offsite].every((u) => pinned.has(u)), [...offsite].join(' ') || 'nothing')
 for (const [ok, name, d] of results) console.log(`${ok.padEnd(4)}  ${name}${d ? '  -- ' + String(d).replace(/\s*\n\s*/g, ' ') : ''}`)
 console.log(`${results.filter((r) => r[0] === 'pass').length}/${results.length} pass`)
 await browser.close()

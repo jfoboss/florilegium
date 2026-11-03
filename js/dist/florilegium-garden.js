@@ -255,7 +255,7 @@ module.exports = { fixed };
 
 };
 defs["ink.js"] = function (module, exports, require) {
-// ink.js — a port of ink.lua (florilegium, Kevin Raymond, MIT): the drawing core.
+// ink.js — a port of florilegium-ink.lua (florilegium, Kevin Raymond, MIT): the drawing core.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // Geometry is computed here; the output is PDF operators as strings, as in Lua,
 // bit for bit (cross-checked by test/ink_cross.js and the whole-page cross-check).
@@ -677,7 +677,7 @@ module.exports = M;
 
 };
 defs["flora.js"] = function (module, exports, require) {
-// flora.js — a port of flora.lua (florilegium, Kevin Raymond, MIT): the garden primitives.
+// flora.js — a port of florilegium-flora.lua (florilegium, Kevin Raymond, MIT): the garden primitives.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // Each primitive draws in its own local frame (cm) under the current ink
 // transform and takes an rng. Translated line by line: the same order of
@@ -1626,7 +1626,7 @@ module.exports = M;
 
 };
 defs["grow.js"] = function (module, exports, require) {
-// grow.js — a port of grow.lua (florilegium, Kevin Raymond, MIT): the grown composition.
+// grow.js — a port of florilegium-grow.lua (florilegium, Kevin Raymond, MIT): the grown composition.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 //
 // No growth animation (events, schedule, frames): a book page does not need it.
@@ -2290,7 +2290,7 @@ module.exports = { page, motifs, regions, field };
 
 };
 defs["page.js"] = function (module, exports, require) {
-// page.js — a port of the needed parts of svg.lua and florilegium.lua (florilegium, Kevin Raymond, MIT):
+// page.js — a port of the needed parts of florilegium-svg.lua and florilegium.lua (florilegium, Kevin Raymond, MIT):
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // TeX-style lengths, colors as xcolor gives them, page layout, garden, SVG.
 // Only the flora theme, default summer, no header (head=false), no author page.

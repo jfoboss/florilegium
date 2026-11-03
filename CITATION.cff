@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: If you use florilegium in your work, please cite it as below.
+type: software
+title: florilegium
+abstract: >-
+  Procedurally generated Delft-blue floral page margins for LuaLaTeX. Every petal, leaf
+  and stem is a parametric curve computed in Lua while the page is written, and placed by a
+  greedy space-filling layout that grows a plant to fit the free space on each page.
+authors:
+  - family-names: Raymond
+    given-names: Kevin
+repository-code: https://github.com/kevinraymond/florilegium
+url: https://kevinraymond.github.io/florilegium/
+license: MIT
+keywords:
+  - LaTeX
+  - LuaLaTeX
+  - Lua
+  - generative art
+  - procedural generation
+  - typography
+  - ornament

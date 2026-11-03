@@ -3,5 +3,7 @@
   "private": true,
   "description": "Operates every control of the playground in headless Chromium and checks what each did",
   "type": "module",
-  "dependencies": { "puppeteer-core": "23.11.1" }
+  "dependencies": {
+    "puppeteer-core": "25.16.0"
+  }
 }

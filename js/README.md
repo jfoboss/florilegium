@@ -3,7 +3,7 @@
 A hand port of the grown composition from Lua to plain JavaScript (ES5 in the bundle, no
 dependencies), made to put florilegium gardens into ePub books. Scope: theme `flora`, the
 page without a header, no animation, no initials. The SVG it writes is **byte for byte** the
-one `svg.lua` writes for the same options.
+one `florilegium-svg.lua` writes for the same options.
 
 Why a port, when `web/` already runs the Lua in the browser through wasmoon: an ePub
 can't load a WebAssembly runtime from a CDN, and most e-readers run only a small subset of
@@ -26,7 +26,7 @@ With scripts off, or on any error, the image stays: the page works without the s
 ```
 
 `data-florilegium` is `seed ink accent [season] [novisitors]`. The engine alone is
-`FlorilegiumGarden.page(options)`, with the options of `svg.lua`'s `M.page`; it returns
+`FlorilegiumGarden.page(options)`, with the options of `florilegium-svg.lua`'s `M.page`; it returns
 `{ svg }`.
 
 ## Files
@@ -35,9 +35,9 @@ With scripts off, or on any error, the image stays: the page works without the s
   atan2, log, exp, pow after fdlibm). The built-in ones of browsers and glibc differ in the
   last bit, and the garden would grow differently.
 - `src/fmt.js` — `%.Nf` as printf does it (exact halves to even).
-- `src/ink.js`, `src/flora.js`, `src/grow.js` — ports of `ink.lua`, `flora.lua`, `grow.lua`.
+- `src/ink.js`, `src/flora.js`, `src/grow.js` — ports of `florilegium-ink.lua`, `florilegium-flora.lua`, `florilegium-grow.lua`.
 - `src/page.js` — TeX lengths, xcolor colors, the page layout, PDF operators to SVG
-  (`svg.lua`, `florilegium.lua`).
+  (`florilegium-svg.lua`, `florilegium.lua`).
 - `src/shmuc.js` — the part-title script described above.
 - `tools/bundle.js` — everything in one file, `dist/florilegium-garden.js`.
 - `tools/rewrite_pow.py` — rewrites `a ^ b` in Lua to `__pow(a, b)`, so the reference can
@@ -61,7 +61,7 @@ The reference with detmath grows the same garden as the original florilegium (gl
 on seeds 1 and 8.
 
 **Not kept in sync automatically**, like `postscript/`: a change to a primitive or to
-`grow.lua` has to be made here too. `page_cross.js` says when it is needed.
+`florilegium-grow.lua` has to be made here too. `page_cross.js` says when it is needed.
 
 Then rebuild the bundle:
 

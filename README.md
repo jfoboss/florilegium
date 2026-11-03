@@ -1,5 +1,11 @@
 # florilegium
 
+[![build](https://github.com/kevinraymond/florilegium/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/kevinraymond/florilegium/actions/workflows/build.yml)
+[![playground](https://github.com/kevinraymond/florilegium/actions/workflows/pages.yml/badge.svg?branch=main)](https://kevinraymond.github.io/florilegium/)
+[![release](https://img.shields.io/github/v/release/kevinraymond/florilegium?color=2456c4)](https://github.com/kevinraymond/florilegium/releases/latest)
+[![license](https://img.shields.io/github/license/kevinraymond/florilegium?color=2456c4)](LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/kevinraymond/florilegium/badge)](https://scorecard.dev/viewer/?uri=github.com/kevinraymond/florilegium)
+
 ## Origin
 
 The [Reddit post](https://www.reddit.com/r/LaTeX/comments/1xixznw/how_do_you_make_these_flowers_in_latex/)
@@ -36,6 +42,7 @@ else it does:
 | composition | **authored**: stems, leaves and flowers placed by hand, every parameter sampled | **grown**: a plant grown to fit the page by a greedy space-filling loop |
 | adapts to | nothing (tuned for A4, 68 mm margin) | the page layout, and the free space below the text on the last page |
 | preview | <img src="gallery/preview-authored.png" alt="authored" width="300"> | <img src="gallery/preview-grown.png" alt="grown" width="300"> |
+| PDF | [florilegium.pdf](https://github.com/kevinraymond/florilegium/releases/latest/download/florilegium.pdf) | [florilegium-grow.pdf](https://github.com/kevinraymond/florilegium/releases/latest/download/florilegium-grow.pdf) |
 
 Both PDFs are self-describing: the body text is the write-up of how the margin is drawn.
 
@@ -72,7 +79,8 @@ painting order. `make grow-6` renders one seed this way (`build/grow-6.gif` and 
 ![the three pages of showcase.tex](gallery/preview-showcase.png)
 
 *`showcase.tex`, "A year in the margin": spring on the first page, summer, autumn on the
-last. Each section describes the feature it shows.*
+last. Each section describes the feature it shows. Download
+[showcase.pdf](https://github.com/kevinraymond/florilegium/releases/latest/download/showcase.pdf).*
 
 The grown margin can respond to the document around it:
 
@@ -124,10 +132,10 @@ OKLCH, so the light end never turns gray.*
 
 The growth loop never knew what it was drawing. It reads a table of motifs (the size of
 the disc each one takes, a weight, a function that draws it) and calls every primitive by
-name. A theme is one Lua file, `theme-<name>.lua`, that replaces some of those primitives
+name. A theme is one Lua file, `florilegium-theme-<name>.lua`, that replaces some of those primitives
 and may add rows to the table, or brings a composition of its own.
 
-**`theme=geometric`** is the same plant cut from flat shapes (`theme-geometric.lua`). It
+**`theme=geometric`** is the same plant cut from flat shapes (`florilegium-theme-geometric.lua`). It
 grows exactly as the flowers do, and only the drawing changes: the stems run straight
 between their nodes, the leaves are kites and toothed polygons folded into a light and a
 dark facet with straight white veins, the flowers are rosettes of rhombi or layered star
@@ -139,7 +147,7 @@ stones) grow among the flowers. A page is about a tenth of the size of a flora p
 
 ![the primitives of the geometric theme](gallery/specimen-geometric.png)
 
-**`theme=math`** is no plant at all (`theme-math.lua`, drawing from `figures.lua`):
+**`theme=math`** is no plant at all (`florilegium-theme-math.lua`, drawing from `florilegium-figures.lua`):
 mathematics cascading down the margin and across the bottom of the page, overlapping a
 little so it blends. A large figure sits in the corner where the column meets the bottom
 (an Apollonian gasket, a deep Koch snowflake, Vogel's disc, a polyhedron). Down the column
@@ -209,7 +217,8 @@ theme's (`crystal` with `geometric`; `knot`, `polyhedron`, `koch`, ... with `mat
 
 *`spread.tex`, pages 2 and 3: a two-sided document with a wide outer margin. The garden
 grows on the left of the left-hand page and, mirrored, on the right of the right-hand page.
-The last page also switches to the geometric theme.*
+The last page also switches to the geometric theme. Download
+[spread.pdf](https://github.com/kevinraymond/florilegium/releases/latest/download/spread.pdf).*
 
 The garden grows in whichever side margin is wider, so there is nothing to set. In a
 two-sided document (`twoside` with a wide `outer` margin) it changes sides with the page. A
@@ -226,16 +235,16 @@ garden the same seed would grow on the left.
 page. The page is a proof, and its colophon, the note a book keeps about its paper, ink and
 printing, is the set of controls: every copper word in it can be changed.*
 
-The same Lua can draw a page without TeX. `svg.lua` runs the package's own code with a small
+The same Lua can draw a page without TeX. `florilegium-svg.lua` runs the package's own code with a small
 stand-in for the few parts of TeX it touches (the page's lengths, the page number, and the node
-a drawing goes into), takes the PDF drawing commands that `ink.lua` writes as it always does,
+a drawing goes into), takes the PDF drawing commands that `florilegium-ink.lua` writes as it always does,
 and rewrites them as SVG. Nothing in the drawing code changes, so the garden is the one
 LuaLaTeX would draw, not an imitation of it.
 
 ```sh
-texlua svg.lua --seed 7 > margin.svg   # page 1 of a document with \def\florilegiumseed{7}
-lua svg.lua --seed 7 --season autumn --ink 5B2A1F --left 25mm --right 65mm > margin.svg
-texlua svg.lua --help                  # paper, margins, two-sided pages, the last page, themes...
+texlua florilegium-svg.lua --seed 7 > margin.svg   # page 1 of a document with \def\florilegiumseed{7}
+lua florilegium-svg.lua --seed 7 --season autumn --ink 5B2A1F --left 25mm --right 65mm > margin.svg
+texlua florilegium-svg.lua --help                  # paper, margins, two-sided pages, the last page, themes...
 make svg SEED=7                        # -> build/svg-7.svg
 ```
 
@@ -273,7 +282,7 @@ part-title pages of an ePub: an e-reader can't load the playground's WebAssembly
 run one small script. `js/dist/florilegium-garden.js` (~120 KB, no dependencies) holds the engine
 and a part-title script that measures the reader's page and regrows the garden, with the same seed,
 on a sheet of that page's shape; with scripts off, a static garden stays in its place. It covers the
-flora theme without the header, animation or initials, and writes the same SVG as `svg.lua`, byte
+flora theme without the header, animation or initials, and writes the same SVG as `florilegium-svg.lua`, byte
 for byte: its cross-checks rebuild the reference from the repo's Lua and compare 96 pages (formats,
 mirror, seasons, density, inks). Its trig, log, exp and pow are computed from `+ - * /` after fdlibm,
 in JS and in Lua alike, since browsers and glibc differ in the last bit. See [`js/README.md`](js/README.md).
@@ -286,15 +295,16 @@ in JS and in Lua alike, since browsers and glibc differ in the last bit. See [`j
 Ghostscript, or a printer, computes every petal while it interprets the page, and the
 two pages of text explain how.*
 
-The drawing core, every primitive and the growth loop are ported from `ink.lua`, `flora.lua`
-and `grow.lua`, procedure for procedure. It needs no TeX and no other file:
+The drawing core, every primitive and the growth loop are ported from `florilegium-ink.lua`, `florilegium-flora.lua`
+and `florilegium-grow.lua`, procedure for procedure. It needs no TeX and no other file:
 
 ```sh
 gs -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -dSeed=7 -o garden.pdf postscript/florilegium.ps
 make postscript             # the same -> build/postscript-7.pdf; SEED=12 for another garden
 ```
 
-`-dSeed=N` picks the garden; without it the clock picks one, so every print is new.
+`-dSeed=N` picks the garden; without it the interpreter's calendar picks one, so every print
+is new.
 `-dAge=0` to `1` sets the season, and `-dNoVisitors` leaves out the butterflies, bees, snail
 and bird. Two pages take about 2.5 seconds. Much of the Lua maps directly: PostScript's own
 transformation matrix places each primitive (translate, rotate, scale), paths and Bézier
@@ -313,6 +323,10 @@ half-width is a procedure handed to the outline builder). Four things don't map:
   where its text ends, so the copper flowers at the headings and the garden under the last
   line work as they do in LaTeX. It has no initials, animation, themes, mirrored pages,
   density or intensity, ornaments in the text, or authored composition.
+
+[`postscript/README.md`](postscript/README.md) describes every option, how a seed is chosen
+when none is given, what to know before porting the file further, and the tests that
+`postscript/check.sh` runs on it.
 
 <img src="gallery/printed.jpg" alt="two prints of florilegium.ps, two different gardens" width="500">
 
@@ -384,14 +398,14 @@ With a theme, its primitives can be drawn by name too: `\florilegiumdraw{crystal
 
 ## How it works
 
-**Drawing** (`ink.lua`). All geometry is computed in Lua and written as PDF path operators
+**Drawing** (`florilegium-ink.lua`). All geometry is computed in Lua and written as PDF path operators
 into one literal node per page; TeX does no arithmetic. Primitives are drawn in a local
 frame under an affine transform, which is read from TikZ when a primitive is called inside
 a scope. Colors come from a tone ramp derived from the one document color `ink`: navy to
 mist at the hue of `ink`, interpolated in OKLCH so the light end stays blue instead of
 turning gray. Tapered strokes are two offset Béziers, not sampled ribbons.
 
-**Primitives** (`flora.lua`). Painted in the order a watercolorist would: a flat wash,
+**Primitives** (`florilegium-flora.lua`). Painted in the order a watercolorist would: a flat wash,
 darker blotches multiplied over it, pigment pooling at the edges, streaks lifted out in
 white, a few fine veins, and almost no outlines. Broad petals and flowers, star lilies seen
 at a tilt, blossoms and florets, buds and bellflowers; lobed and entire leaves; forget-me-not
@@ -399,13 +413,13 @@ cymes that curl like a scorpion's tail, branching sprigs, umbels, tendrils, seed
 butterflies, bees, snails and a bird; copper sparkles, rosettes and the ivy-leaf fleuron
 whose stem becomes the head rule. Any of them can be painted as a pale ghost.
 
-**Authored composition** (`authored.lua`). A plant grows from a root in the bottom-left
+**Authored composition** (`florilegium-authored.lua`). A plant grows from a root in the bottom-left
 corner: three stems through hand-picked control points, a fourth along the bottom of the
 page as the footer, leaves at chosen fractions of the stems, and every other motif on a
 branch that leaves its stem tangentially and arrives along the motif's axis — so every
 flower can be traced back to the root.
 
-**Grown composition** (`grow.lua`), in the spirit of Wong, Zongker & Salesin,
+**Grown composition** (`florilegium-grow.lua`), in the spirit of Wong, Zongker & Salesin,
 [*Computer-Generated Floral Ornament*](https://dl.acm.org/doi/10.1145/280814.280948)
 (SIGGRAPH 1998). The stems sway up the column as smooth noise of their height; leaves are
 hung at their nodes where there is room. Then, repeatedly: take the largest free disc within
@@ -422,7 +436,7 @@ the page; the garden then gives those lines their flowers before any leaf is hun
 reweights the motifs: buds and sprays of buds in spring, seed heads in autumn, when some
 leaves are painted with a ramp built from the accent instead of the ink.
 
-**Initials** (`initial.lua`). The letter's outline comes from luaotfload's OpenType reader as
+**Initials** (`florilegium-initial.lua`). The letter's outline comes from luaotfload's OpenType reader as
 Bézier segments. Flattened into polygons, it gives an even-odd inside test, and a grid of
 distances to the letter and the frame finds the largest gaps for the flowers. The vine is a
 Catmull-Rom curve across the tile; where it crosses the letter it goes over and under in
@@ -442,9 +456,11 @@ yet done.
 - The growth loop follows Wong, Zongker & Salesin,
   [*Computer-Generated Floral Ornament*](https://dl.acm.org/doi/10.1145/280814.280948) (SIGGRAPH 1998).
 - The tone ramp is computed in [Oklab](https://bottosson.github.io/posts/oklab/), Björn Ottosson's
-  perceptual color space; the conversion matrices in `ink.lua` are his, released into the public domain.
+  perceptual color space; the conversion matrices in `florilegium-ink.lua` are his, released into the public domain.
 - The random numbers come from [mulberry32](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c),
-  Tommy Ettinger's public-domain generator.
+  Tommy Ettinger's public-domain generator. The PostScript port uses the "minimal standard"
+  generator of Park and Miller (Communications of the ACM, 1988) by Schrage's method (ACM
+  Transactions on Mathematical Software, 1979).
 - `\florilegiumornament`, its `ink` and `seed=random` keys, and the `density` option answer
   [issue #4](https://github.com/kevinraymond/florilegium/issues/4) from rubyFeedback.
 - The playground runs the Lua in the browser with [wasmoon](https://github.com/ceifa/wasmoon)

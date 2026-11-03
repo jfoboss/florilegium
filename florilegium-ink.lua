@@ -1,4 +1,4 @@
--- ink.lua -- the drawing core of florilegium: geometry in Lua, raw PDF out.
+-- florilegium-ink.lua -- the drawing core of florilegium: geometry in Lua, raw PDF out.
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
 -- Everything is computed here and written as PDF path operators into a literal
@@ -12,6 +12,7 @@
 -- computed in OKLCH so the light end stays blue instead of turning gray.
 
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 
 local fmt, floor, sqrt, sin, cos, atan, pi, abs = string.format, math.floor, math.sqrt, math.sin, math.cos, math.atan, math.pi, math.abs
 local concat = table.concat

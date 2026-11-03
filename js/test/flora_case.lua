@@ -10,8 +10,8 @@ local streams = {}
 tex = { sprint = function() end }
 luatexbase = { registernumber = function() return 0 end }
 node = { new = function() return {} end, write = function(n) streams[#streams + 1] = n.data end }
-local ink = require("ink")
-local flora = require("flora")
+local ink = require("florilegium-ink")
+local flora = require("florilegium-flora")
 local cases = dofile(casefile)
 
 local res = {}

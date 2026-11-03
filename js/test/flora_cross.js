@@ -1,4 +1,4 @@
-// Cross-check of flora.js against the reference flora.lua (+ detmath): each primitive many times,
+// Cross-check of flora.js against the reference florilegium-flora.lua (+ detmath): each primitive many times,
 // at different scales (level of detail), rotations and in "ghost" mode.
 // One case list serves both sides: for Lua it is printed as a table.
 "use strict";

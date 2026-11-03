@@ -1,8 +1,8 @@
--- theme-geometric.lua -- a theme for florilegium: the same plant, cut from flat
+-- florilegium-theme-geometric.lua -- a theme for florilegium: the same plant, cut from flat
 -- shapes with straight edges.
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
--- grow.lua draws every primitive through the current theme, so the garden grows
+-- florilegium-grow.lua draws every primitive through the current theme, so the garden grows
 -- exactly as it does with flora: the stems sway up the column, leaves hang at the
 -- nodes, the loop fills the holes. Only the drawing changes. Stems run straight
 -- between nodes a centimeter or so apart; leaves are kites or toothed polygons,
@@ -13,10 +13,11 @@
 -- One motif is added: crystals (Platonic solids, flat-shaded like cut stones).
 -- Use: \usepackage[grown,theme=geometric]{florilegium}.
 
-local ink = require("ink")
-local flora = require("flora")
-local figures = require("figures")
+local ink = require("florilegium-ink")
+local flora = require("florilegium-flora")
+local figures = require("florilegium-figures")
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 
 local sin, cos, sqrt, pi, abs, floor, max, min = math.sin, math.cos, math.sqrt, math.pi, math.abs, math.floor, math.max, math.min
 local tone, white = ink.tone, ink.white
@@ -560,12 +561,12 @@ M.flora = {
 }
 
 function M.motifs(rows, F)
-  local grow = require("grow")
+  local grow = require("florilegium-grow")
   local L = grow.layers
   local by = {}
   for _, m in ipairs(rows) do by[m.name] = m end
   local tone = ink.tone
-  -- the sprays of grow.lua on straight stalks
+  -- the sprays of florilegium-grow.lua on straight stalks
   local function spray(rng, s, n0, n1, spread, fn)
     local n = rng.int(n0, n1)
     for k = 1, n do

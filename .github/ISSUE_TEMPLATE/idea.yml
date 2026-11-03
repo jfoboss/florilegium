@@ -1,0 +1,15 @@
+name: A feature or a change
+description: Something florilegium could do, once it is clear enough to build. Ideas still taking shape do well in Discussions first.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like it to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Where would you use it?
+      description: The kind of document, and a picture of what you have in mind if you have one.

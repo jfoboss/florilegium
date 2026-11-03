@@ -1,4 +1,4 @@
-// flora.js — a port of flora.lua (florilegium, Kevin Raymond, MIT): the garden primitives.
+// flora.js — a port of florilegium-flora.lua (florilegium, Kevin Raymond, MIT): the garden primitives.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // Each primitive draws in its own local frame (cm) under the current ink
 // transform and takes an rng. Translated line by line: the same order of

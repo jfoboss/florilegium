@@ -1,4 +1,4 @@
--- figures.lua -- mathematical figures for florilegium's themes, drawn with ink.lua.
+-- florilegium-figures.lua -- mathematical figures for florilegium's themes, drawn with florilegium-ink.lua.
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
 -- Line drawings in the ink with a pale wash, the copper kept for a focus or a guide
@@ -13,11 +13,12 @@
 --              level at a time, the cube truncated into the octahedron, ...)
 --   helpers    maurer, phyllotaxis, fay, vogel; hull_of, truncate, solid (convex
 --              solids in wireframe); compass (a fleuron for the header); caption_width
--- theme-math.lua builds its margin from these; theme-geometric.lua borrows a few.
+-- florilegium-theme-math.lua builds its margin from these; florilegium-theme-geometric.lua borrows a few.
 
-local ink = require("ink")
-local flora = require("flora")
+local ink = require("florilegium-ink")
+local flora = require("florilegium-flora")
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 
 local sin, cos, sqrt, exp, pi, abs, floor, max, min = math.sin, math.cos, math.sqrt, math.exp, math.pi, math.abs, math.floor, math.max, math.min
 local tone, white = ink.tone, ink.white
@@ -213,7 +214,7 @@ end
 -- radius R (cm) around the origin, caption(p) -> TeX for the label under it.
 local FIG = {}
 
--- Maurer rose (theme-math.lua draws it)
+-- Maurer rose (florilegium-theme-math.lua draws it)
 local MAURER = { { 2, 39 }, { 6, 71 }, { 5, 97 }, { 4, 31 }, { 7, 19 }, { 3, 47 } }
 FIG.maurer = {
   w = 2, max = 2, r = { 0.7, 1.3 },

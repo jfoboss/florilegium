@@ -1,13 +1,16 @@
 %% text-sharing.tex -- shared closing section
 \subsubsection{Building and sharing}
 
-The package is \texttt{florilegium.sty} with nine Lua files beside it: \texttt{ink.lua}
-(geometry, color and PDF output), \texttt{flora.lua} (the primitives),
-\texttt{authored.lua} and \texttt{grow.lua} (the two compositions), \texttt{initial.lua}
-(the decorated initials), two themes and the figures one of them draws from
-(\texttt{theme-geometric.lua}: the same plant cut from flat shapes;
-\texttt{theme-math.lua}: figures, symbols and equations cascading down the margin;
-\texttt{figures.lua}) and \texttt{florilegium.lua} (the glue to \TeX). It needs Lua\LaTeX\ and one compilation, at
+The package is \texttt{florilegium.sty} with nine Lua files beside it. Of these,
+\texttt{florilegium.lua} is the glue to \TeX. The names of the other eight begin with
+\texttt{florilegium-}, because \TeX\ finds a file by its bare name, the document's folder
+first, and a generic name would lose to a file of the author's own. After the prefix come
+\texttt{ink} (geometry, color and PDF output), \texttt{flora}
+(the primitives), \texttt{authored} and \texttt{grow} (the two compositions),
+\texttt{initial} (the decorated initials), and two themes with the figures one of them
+draws from (\texttt{theme-geometric}, the same plant cut from flat shapes;
+\texttt{theme-math}, figures, symbols and equations cascading down the margin;
+\texttt{figures}). It needs Lua\LaTeX\ and one compilation, at
 about a second per page. To share it, the three routes that work are, in increasing order
 of effort: paste the files into a blank Overleaf project with the compiler set to
 Lua\LaTeX\ and share the link; put them in a Git repository with a continuous integration

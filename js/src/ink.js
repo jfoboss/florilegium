@@ -1,4 +1,4 @@
-// ink.js — a port of ink.lua (florilegium, Kevin Raymond, MIT): the drawing core.
+// ink.js — a port of florilegium-ink.lua (florilegium, Kevin Raymond, MIT): the drawing core.
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // Geometry is computed here; the output is PDF operators as strings, as in Lua,
 // bit for bit (cross-checked by test/ink_cross.js and the whole-page cross-check).

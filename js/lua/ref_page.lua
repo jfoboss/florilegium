@@ -25,7 +25,7 @@ if o.paper and type(o.paper) == "string" then
   local w, h = o.paper:match("^(%d+%.?%d*)x(%d+%.?%d*)$")
   if w then o.paper = { w .. "mm", h .. "mm" } end
 end
-local svg = require("svg")
+local svg = require("florilegium-svg")
 local s = svg.page(o)
 local f = assert(io.open(out, "w"))
 f:write(s)

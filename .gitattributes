@@ -1,0 +1,6 @@
+# Left out of GitHub's "Source code" downloads and of git archive, which make them: the
+# write-up's originals (process/, 21 MB with the first repository's zip) and the README's
+# images (gallery/, 11 MB; make preview and make gallery draw them again). Everything a user
+# copies or builds with stays in, tools/ too, which the Docker build in README needs.
+process/ export-ignore
+gallery/ export-ignore

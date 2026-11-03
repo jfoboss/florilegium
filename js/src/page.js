@@ -1,4 +1,4 @@
-// page.js — a port of the needed parts of svg.lua and florilegium.lua (florilegium, Kevin Raymond, MIT):
+// page.js — a port of the needed parts of florilegium-svg.lua and florilegium.lua (florilegium, Kevin Raymond, MIT):
 // Copyright (c) 2026 Kevin Raymond; JavaScript port (c) 2026 jfoboss. MIT License: see LICENSE.
 // TeX-style lengths, colors as xcolor gives them, page layout, garden, SVG.
 // Only the flora theme, default summer, no header (head=false), no author page.

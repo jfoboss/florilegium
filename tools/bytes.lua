@@ -5,7 +5,7 @@ luatexbase = { registernumber = function() return 0 end }
 local written = 0
 node = { new = function() return {} end, write = function(n) written = written + #n.data end }
 package.path = "./?.lua;" .. package.path
-local ink, flora = require("ink"), require("flora")
+local ink, flora = require("florilegium-ink"), require("florilegium-flora")
 local function measure(name, fn)
   local tot = 0
   for k = 1, 10 do

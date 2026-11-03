@@ -1,0 +1,27 @@
+# Dependabot keeps the actions in .github/workflows and the playground's test tool
+# (tools/playcheck) up to date, all in one pull request a month, and proposes a release
+# only after it has been out for a week. Security alerts don't wait for this: they appear
+# in the Security tab as soon as they are known, without pull requests.
+# Not covered here: tools/Dockerfile (it pins TeX Live 2023 on purpose) and the CDN files
+# the playground pins in web/*.js (tools/sri.sh checks those).
+version: 2
+
+multi-ecosystem-groups:
+  monthly:
+    schedule:
+      interval: monthly
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    patterns: ['*']
+    multi-ecosystem-group: monthly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: npm
+    directory: /tools/playcheck
+    patterns: ['*']
+    multi-ecosystem-group: monthly
+    cooldown:
+      default-days: 7

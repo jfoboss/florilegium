@@ -1,4 +1,4 @@
--- initial.lua -- a decorated initial for florilegium (LuaLaTeX only).
+-- florilegium-initial.lua -- a decorated initial for florilegium (LuaLaTeX only).
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
 -- A square tile at the start of a paragraph: the letter, its outline read from
@@ -8,9 +8,10 @@
 -- Drawn in a local frame of centimeters, [0,S] x [0,S], under the current ink
 -- transform.
 
-local ink = require("ink")
-local flora = require("flora")
+local ink = require("florilegium-ink")
+local flora = require("florilegium-flora")
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 
 local sqrt, cos, sin, pi, floor, max, min, abs, atan = math.sqrt, math.cos, math.sin, math.pi, math.floor, math.max, math.min, math.abs, math.atan
 local tone, white = ink.tone, ink.white

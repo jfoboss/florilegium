@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Only this site's own files may run here, plus MathJax at the one version whose hash
+     captions.js pins. The worker (worker.js) checks wasmoon's hashes itself. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js; style-src 'self' 'unsafe-inline'; img-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Florilegium proof</title>
 <meta name="description" content="Grow a Delft-blue floral page margin with the same Lua that draws it in LuaLaTeX, and take it home as SVG, LaTeX or Typst.">

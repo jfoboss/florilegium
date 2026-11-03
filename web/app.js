@@ -1,6 +1,6 @@
 // app.js -- the proof and its colophon. Every copper word in the colophon is a control,
 // and the sentence is rebuilt from the state each time, so it always says what the page
-// is (it is the garden's alt text too). The garden comes from worker.js (svg.lua under
+// is (it is the garden's alt text too). The garden comes from worker.js (florilegium-svg.lua under
 // wasmoon), the math theme's text from captions.js (MathJax).
 // Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 
@@ -75,7 +75,7 @@ function writeHash() {
   history.replaceState(null, '', '#' + p.toString())
 }
 
-// what svg.lua gets
+// what florilegium-svg.lua gets
 function options(seed = state.seed) {
   const o = {
     seed, paper: state.paper, density: state.density, intensity: state.strength, ink: state.ink, accent: state.accent,
@@ -154,7 +154,7 @@ function openChooser(t) {
   t.setAttribute('aria-expanded', 'true')
   chooser.innerHTML = ''
   if (k === 'seed') {
-    chooser.innerHTML = `<form><input type="number" min="1" max="999999" value="${state.seed}" aria-label="Seed"><button class="term" type="submit">grow it</button></form>
+    chooser.innerHTML = `<form><input type="number" min="1" max="999999" value="${esc(state.seed)}" aria-label="Seed"><button class="term" type="submit">grow it</button></form>
       <button role="option" data-v="random"><span class="mark"></span><span>a seed at random</span></button>`
     chooser.querySelector('form').onsubmit = (e) => { e.preventDefault(); pick('seed', Math.max(1, Math.min(999999, Math.round(+e.target[0].value) || 1))) }
     chooser.querySelector('[data-v=random]').onclick = () => pick('seed', 1 + Math.floor(Math.random() * 99999))
@@ -456,7 +456,7 @@ function pageText(m) {
     : `Nothing on this page is a picture of a flower. There are no stored shapes and no drawings to copy: every stem is a path along
       a noisy curve, every leaf a blade around its spine, every flower a ring of petals each a little different from the last, and the seed chooses all of it.`)
   P.push(`Every page of a long document grows its own margin, from its own seed and fitted to its own space${isMath() ? '' : ', and the seasons can turn from the first page to the last'}.`)
-  $('#text').innerHTML = `<h2><span>1</span>Seed ${s.seed}</h2>` + P.map((p) => `<p>${esc(p.replace(/\s+/g, ' ').trim())}</p>`).join('')
+  $('#text').innerHTML = `<h2><span>1</span>Seed ${esc(s.seed)}</h2>` + P.map((p) => `<p>${esc(p.replace(/\s+/g, ' ').trim())}</p>`).join('')
   fit()
 }
 
@@ -503,7 +503,7 @@ function snippet() {
     return [`${file}:${mb} a whole ${P.name} page with a transparent background, the ${isMath() ? 'figures' : 'garden'} in its margin`,
       `For Typst, a web page or your notes. It ${term('head', s.head ? 'keeps' : 'leaves out')} the head rule and ${HEAD[s.style]}.`, true]
   }
-  const a = ['texlua svg.lua --seed ' + s.seed]
+  const a = ['texlua florilegium-svg.lua --seed ' + s.seed]
   if (s.paper !== 'a4') a.push('--paper ' + s.paper)
   if (left !== 68 || right !== INNER) a.push(`--left ${left}mm --right ${right}mm`)
   if (s.season !== 'summer' && !isMath()) a.push('--season ' + s.season)

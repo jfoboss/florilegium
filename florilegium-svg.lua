@@ -1,11 +1,11 @@
--- svg.lua -- a florilegium page as SVG, without TeX: for Typst, the web, notes,
+-- florilegium-svg.lua -- a florilegium page as SVG, without TeX: for Typst, the web, notes,
 -- anything that takes an image. The same Lua draws the same garden; only the
--- last step differs. ink.lua writes a PDF content stream as always, and this
+-- last step differs. florilegium-ink.lua writes a PDF content stream as always, and this
 -- file reads it back (the few operators ink uses) and writes SVG elements.
 -- Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 --
---   texlua svg.lua --seed 7 > margin.svg        (or lua 5.3/5.4: lua svg.lua ...)
---   texlua svg.lua --help
+--   texlua florilegium-svg.lua --seed 7 > margin.svg        (or lua 5.3/5.4: lua florilegium-svg.lua ...)
+--   texlua florilegium-svg.lua --help
 --
 -- The page is laid out the way LuaLaTeX and the geometry package lay it out:
 -- lengths are scanned as TeX scans them, and florilegium.geometry() itself
@@ -13,6 +13,7 @@
 -- \def\florilegiumseed{7} and the same margins.
 
 local M = {}
+M.version = "1.3"                 -- the release; florilegium.lua checks that every file has the same
 local fmt, floor, concat = string.format, math.floor, table.concat
 
 -- ---------------------------------------------------------------- lengths
@@ -126,7 +127,7 @@ function M.translate(stream, out, id)
         if not kind then error("florilegium: unknown graphics state " .. tostring(args[n]), 0) end
         st.op, st.mult = tonumber(v) / 100, kind == "m"
       elseif t == "J" or t == "j" then        -- always round (ink sets 1 J 1 j); the root group says so
-      else error("florilegium: svg.lua cannot translate the PDF operator '" .. t .. "'", 0) end
+      else error("florilegium: florilegium-svg.lua cannot translate the PDF operator '" .. t .. "'", 0) end
       args = {}
     end
   end
@@ -179,7 +180,7 @@ end
 -- the margin (the math theme's symbols and equations), which needs a TeX typesetter
 -- and is not in the SVG: { x, y (page cm), tex, anchor (TikZ's), size (pt), rotate
 -- (degrees, counterclockwise), color (#rrggbb), opacity }, mirrored as florilegium.lua
--- mirrors it for TikZ; stats, what grew (grow.lua: motifs, counts by motif, stems,
+-- mirrors it for TikZ; stats, what grew (florilegium-grow.lua: motifs, counts by motif, stems,
 -- cells; nil for the authored page and the math theme).
 function M.page(o)
   o = o or {}
@@ -209,7 +210,7 @@ function M.page(o)
   texio = nil
   local ok, res = pcall(function()
     local fl = require("florilegium")
-    local ink = require("ink")
+    local ink = require("florilegium-ink")
     fl.twoside = o.twoside and true or false
     local ir, ig, ib = html(o.ink or "2456C4")
     local ar, ag, ab = html(o.accent or "B4662F")
@@ -257,7 +258,7 @@ function M.page(o)
     return { g = g, captions = caps, stats = fl.last_stats }
   end)
   if not ok then                              -- leave nothing half drawn for the next page
-    local ink = package.loaded["ink"]
+    local ink = package.loaded["florilegium-ink"]
     if ink then ink.take_recording() ink.discard() ink.set_lift(0) ink.set_pale(0) end
   end
   tex, node, luatexbase, texio = saved.tex, saved.node, saved.luatexbase, saved.texio
@@ -284,7 +285,7 @@ end
 
 -- ---------------------------------------------------------------- command line
 local USAGE = [[
-usage: texlua svg.lua [options] > page.svg      (lua 5.3 or 5.4 works too)
+usage: texlua florilegium-svg.lua [options] > page.svg      (lua 5.3 or 5.4 works too)
 
   --seed N          the document's seed (\def\florilegiumseed{N}); default: none
   --page N          the page number (default 1)
@@ -320,18 +321,18 @@ function M.main(argv)
       if flags[key] == true then o[key] = true else o[flags[key]] = false end
     elseif key and values[key] and argv[i + 1] then
       o[key] = argv[i + 1] i = i + 1
-    else io.stderr:write("svg.lua: unknown option " .. a .. "\n" .. USAGE) return 2 end
+    else io.stderr:write("florilegium-svg.lua: unknown option " .. a .. "\n" .. USAGE) return 2 end
     i = i + 1
   end
   if o.paper and not PAPERS[o.paper] then
     local w, h = o.paper:match("^(%d+%.?%d*)x(%d+%.?%d*)$")
-    if not w then io.stderr:write("svg.lua: unknown paper " .. o.paper .. "\n") return 2 end
+    if not w then io.stderr:write("florilegium-svg.lua: unknown paper " .. o.paper .. "\n") return 2 end
     o.paper = { w .. "mm", h .. "mm" }
   end
   local ok, svg, _, more = pcall(M.page, o)
-  if not ok then io.stderr:write("svg.lua: " .. tostring(svg) .. "\n") return 1 end
+  if not ok then io.stderr:write("florilegium-svg.lua: " .. tostring(svg) .. "\n") return 1 end
   if #more.captions > 0 then
-    io.stderr:write(fmt("svg.lua: %d equations and symbols need TeX and are left out (LuaLaTeX sets them; the playground uses MathJax)\n", #more.captions))
+    io.stderr:write(fmt("florilegium-svg.lua: %d equations and symbols need TeX and are left out (LuaLaTeX sets them; the playground uses MathJax)\n", #more.captions))
   end
   local f = file and assert(io.open(file, "w")) or io.stdout
   f:write(svg)
@@ -340,10 +341,10 @@ function M.main(argv)
 end
 
 -- run as a script: put this file's directory on the module path
-if arg and arg[0] and arg[0]:match("svg%.lua$") and not package.loaded["svg"] then
+if arg and arg[0] and arg[0]:match("florilegium%-svg%.lua$") and not package.loaded["florilegium-svg"] then
   local dir = arg[0]:match("^(.*)[/\\]") or "."
   package.path = dir .. "/?.lua;" .. package.path
-  package.loaded["svg"] = M
+  package.loaded["florilegium-svg"] = M
   os.exit(M.main(arg))
 end
 

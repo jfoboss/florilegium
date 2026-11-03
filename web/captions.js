@@ -5,7 +5,8 @@
 // it is not TeX's own output, so these are the one part not identical to a PDF.
 // Copyright (c) 2026 Kevin Raymond. MIT License: see LICENSE or florilegium.sty.
 
-const MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js'
+// only the bytes published to npm as MathJax 3.2.2 (Subresource Integrity, as in worker.js)
+const MATHJAX = ['https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js', 'sha384-KKWa9jJ1MZvssLeOoXG6FiOAZfAgmzsIIfw8BXwI9+kYm0lPCbC6yTQPBC00F1/L']
 const BP = 72 / 2.54                              // bp per cm
 const PT = 72 / 72.27                             // bp per TeX point
 
@@ -20,7 +21,9 @@ function mathjax() {
   }
   loading = new Promise((resolve, reject) => {
     const s = document.createElement('script')
-    s.src = MATHJAX
+    s.src = MATHJAX[0]
+    s.integrity = MATHJAX[1]
+    s.crossOrigin = 'anonymous'                   // integrity needs a CORS fetch
     s.onload = () => window.MathJax.startup.promise.then(resolve, reject)
     s.onerror = () => reject(new Error('could not load MathJax'))
     document.head.appendChild(s)

@@ -11,3 +11,6 @@ scratch/
 !gallery/*.png
 !process/**/*.png
 tools/playcheck/node_modules/
+# the documents' PDFs are built by make, and by CI, which attaches them to each release;
+# the leading slash keeps the original PDFs under process/
+/*.pdf

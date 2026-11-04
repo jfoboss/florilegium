@@ -1588,6 +1588,9 @@ function M.page(g)
   for _, r in ipairs(rects) do
     local x1, y1, x2, y2 = r[1] - 0.25, r[2] - 0.3, r[3] + (r == col and 0.25 or 0.3), r[4] + 0.3
     if bleed > 0 then
+      -- a footer band squeezed by a small bottom margin comes out upside down (its top
+      -- below its bottom); order it first, or the bleed moves it off the paper
+      if y2 < y1 then y1, y2 = y2, y1 end
       if r[1] < 0.6 then x1 = x1 - bleed end
       if r[2] < 0.6 then y1 = y1 - bleed end
       if r[3] > g.pw - 0.6 then x2 = x2 + bleed end

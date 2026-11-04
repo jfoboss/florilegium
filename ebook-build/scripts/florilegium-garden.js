@@ -2274,12 +2274,23 @@ function page(g) {
     ink.circle(x2 + 0.45, e[1], 0.025); ink.fill(ink.accent(0));
   }
 
-  // assemble: a safety clip a little outside the regions, then the layers
+  // assemble: a safety clip a little outside the regions, then the layers. With g.bleed
+  // (florilegium-svg.lua's bleed, #27) the sides that lie along the paper's edges move out
+  // to the bleed, so nothing is cut by a straight line there; the sides facing the text stay.
   ink.tag(null);
   ink.layer(0);
   for (const r of rects) {
-    const xr = r[2] + (r === col ? 0.25 : 0.3);
-    ink.poly([[r[0] - 0.25, r[1] - 0.3], [xr, r[1] - 0.3], [xr, r[3] + 0.3], [r[0] - 0.25, r[3] + 0.3]], true);
+    let x1 = r[0] - 0.25, y1 = r[1] - 0.3, x2 = r[2] + (r === col ? 0.25 : 0.3), y2 = r[3] + 0.3;
+    if (g.bleed !== undefined) {
+      // a footer band squeezed by a small bottom margin can come out upside down
+      // (top below bottom); order it first, or the bleed moves it off the paper
+      if (y2 < y1) { const t = y1; y1 = y2; y2 = t; }
+      if (r[0] < 1) x1 = -g.bleed;
+      if (r[1] < 1) y1 = -g.bleed;
+      if (r[2] > g.pw - 1) x2 = g.pw + g.bleed;
+      if (r[3] > g.ph - 1) y2 = g.ph + g.bleed;
+    }
+    ink.poly([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], true);
   }
   ink.clip();
   ink.layer(99);
@@ -2500,6 +2511,10 @@ function page(o) {
   g.marks = [];
   g.seed = seed; g.spill = spill; g.spilly = spilly; g.visitors = visitors; g.age = age; g.theme = undefined;
   if (density < 1) g.density = Math.max(0.03, density);
+  // bleed (a length, florilegium-svg.lua's --bleed): the garden runs that far past the
+  // paper's edges, uncut, and the SVG grows by as much on every side
+  const bleed = o.bleed !== undefined && o.bleed !== null ? sp(o.bleed) * 2.54 / (72.27 * 65536) : undefined;
+  if (bleed !== undefined) g.bleed = bleed;
   const old = ink.set_pale(0.85 * (1 - Math.max(0, Math.min(1, intensity))));
   let stats;
   try {
@@ -2516,8 +2531,12 @@ function page(o) {
   const CM = 72 / 2.54;
   const W = g.pw * CM, H = g.ph * CM;
   const id = o.id || ("flo" + floor(Number(o.seed) || 0) + "-");
-  const out = ['<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed(g.pw * 10, 2) + 'mm" height="' + fixed(g.ph * 10, 2) +
-    'mm" viewBox="0 0 ' + fixed(W, 2) + " " + fixed(H, 2) + '">'];
+  const out = [bleed === undefined
+    ? '<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed(g.pw * 10, 2) + 'mm" height="' + fixed(g.ph * 10, 2) +
+      'mm" viewBox="0 0 ' + fixed(W, 2) + " " + fixed(H, 2) + '">'
+    : '<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed((g.pw + 2 * bleed) * 10, 2) + 'mm" height="' +
+      fixed((g.ph + 2 * bleed) * 10, 2) + 'mm" viewBox="' + fixed(-bleed * CM, 2) + " " + fixed(-bleed * CM, 2) + " " +
+      fixed(W + 2 * bleed * CM, 2) + " " + fixed(H + 2 * bleed * CM, 2) + '">'];
   if (o.background) {
     const h = String(o.background).replace(/^#/, "");
     if (!/^[0-9a-fA-F]{6}$/.test(h)) throw new Error("florilegium: not a color (RRGGBB): '" + h + "'");
@@ -2774,34 +2793,18 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
     return { W: W, left: left, right: right, textleft: left, textright: W - right };
   }
 
-  // garden mask: outer sides are dropped so leaves at the sheet edge are not cut
-  // (like unclip in ebook-build/scripts/make_gardens.py); inner ones (the title zone border) stay
-  function unclip(svg, s) {
-    var Hpt = H / PT_MM, far = 120, edge = (s.textright - 10) / PT_MM;
-    var re = /(<clipPath id="[^"]+"><path d=")([^"]+)("\/><\/clipPath>)/;
-    var m = re.exec(svg);
-    if (!m) return svg;
-    var rects = [], r, rr = /M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)Z/g;
-    while ((r = rr.exec(m[2]))) {
-      var x1 = Math.min(+r[1], +r[3]), x2 = Math.max(+r[1], +r[3]);
-      var y1 = Math.min(+r[2], +r[6]), y2 = Math.max(+r[2], +r[6]);
-      if (x1 < 8) x1 -= far;
-      if (y1 < 8) y1 -= far;
-      if (y2 > Hpt - 8) y2 += far;
-      if (x2 > edge) x2 += far;
-      rects.push("M" + x1 + " " + y1 + "L" + x2 + " " + y1 + "L" + x2 + " " + y2 + "L" + x1 + " " + y2 + "Z");
-    }
-    return svg.replace(m[0], m[1] + rects.join("") + m[3]);
-  }
+  // the garden is not cut along the sheet's edges: bleed (florilegium-svg.lua's --bleed, #27),
+  // the same 40 bp that make_gardens.py gives the static picture, so both are clipped alike
+  var BLEED = "40bp";
 
   function grow(el, s) {
     var d = el.getAttribute("data-florilegium").split(" ");   // seed ink accent [season] [novisitors]
     var o = { seed: +d[0], ink: d[1], accent: d[2], paper: s.W + "x" + H,
       left: s.left + "mm", right: s.right + "mm", top: TOP + "mm", bottom: BOTTOM + "mm",
-      headsep: "0mm", headheight: "0pt", textend: TEXTEND + "mm", id: "flo" + d[0] + "w" + s.W + "-" };
+      headsep: "0mm", headheight: "0pt", textend: TEXTEND + "mm", bleed: BLEED, id: "flo" + d[0] + "w" + s.W + "-" };
     if (d[3] && d[3] !== "summer") o.season = d[3];
     if (d[4] === "novisitors") o.visitors = false;
-    var svg = unclip(F.page(o).svg, s);
+    var svg = F.page(o).svg;
     var inner = svg.slice(svg.indexOf("<g transform"), svg.lastIndexOf("</svg>"));
     var doc = new DOMParser().parseFromString('<svg xmlns="' + NS + '"><g class="flo-garden" transform="scale(' + PT_MM + ')">' +
       inner + "</g></svg>", "image/svg+xml");

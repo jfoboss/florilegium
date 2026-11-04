@@ -47,7 +47,7 @@ same millimeters per pixel, so the flowers match. Here too the images are the fa
 
 `FlorilegiumGarden` (`version: 2`); every function returns an SVG string, except `page`:
 
-- `page(options)` — the options of `florilegium-svg.lua`'s `M.page`; returns `{ svg }`.
+- `page(options)` — the options of `florilegium-svg.lua`'s `M.page`, `bleed` included (#27, merged into this fork's v1.3); returns `{ svg }`. `shmuc.js` asks for `bleed: "40bp"`, as `make_gardens.py` does, so the live garden and the static picture are clipped alike.
 - `band({ seed, ink, accent, width, height = 80, season, visitors, id })` — the headpiece:
   the grown garden on a low, wide `width × height` mm sheet, a narrow column on the left
   and branches running right; the mask is lifted on all sides but the bottom.

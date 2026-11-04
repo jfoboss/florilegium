@@ -13,9 +13,9 @@
 Шаги на каждый сад:
   1. florilegium-svg.lua рисует страницу 120×200 мм: сад на левом поле и под «концом
      текста», пустой угол справа сверху — под название части;
-  2. внешняя маска генератора снимается: он обрезает цветы по краю листа
-     прямой линией, а на шмуцтитуле сад стоит посреди страницы читалки,
-     и срез виден. Внутренние стороны маски (граница зоны под название)
+  2. с опцией --bleed (florilegium #27) генератор не обрезает цветы по краю
+     листа: на шмуцтитуле сад стоит посреди страницы читалки, и срез был бы
+     виден. Стороны маски, обращённые к тексту (граница зоны под название),
      остаются;
   3. растр 10 px/мм с запасом 40 pt вокруг, обрезка общего пустого поля до
      холста 121×201 мм — на него рассчитаны координаты названия
@@ -55,30 +55,6 @@ CROP_PX = (100, 160, 1310, 2170)     # -> 1210×2010 px = холст 121×201 м
 DEFAULTS = GARDEN_GEN_DEFAULTS     # общие с живым садом (ebook_common.garden_gen)
 
 
-def unclip(svg: str, pad: float) -> str:
-    """Снять внешние стороны маски сада и добавить запас вокруг листа."""
-    m = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg)
-    W, H = float(m.group(1)), float(m.group(2))
-    cm = re.search(r'(<clipPath id="([^"]+)"><path d=")([^"]+)("/></clipPath><g clip-path="url\(#\2\)">)', svg)
-    if not cm:
-        raise SystemExit("make_gardens: не нашёл маску сада в выводе florilegium-svg.lua — формат генератора сменился?")
-    far = 2 * pad + 10
-    rects = []
-    for r in re.findall(r"M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)Z",
-                        cm.group(3)):
-        x1, x2 = sorted({float(r[0]), float(r[2])})
-        y1, y2 = sorted({float(r[1]), float(r[5])})
-        if x1 < 8: x1 -= far            # левый край листа
-        if y1 < 8: y1 -= far            # низ листа (оси PDF: y вверх)
-        if y2 > H - 8: y2 += far        # верх листа
-        if x2 > W * 0.6: x2 += far      # правый край; x2 левой колонки — граница зоны названия
-        rects.append(f"M{x1:.1f} {y1:.1f}L{x2:.1f} {y1:.1f}L{x2:.1f} {y2:.1f}L{x1:.1f} {y2:.1f}Z")
-    svg = svg.replace(cm.group(0), cm.group(1) + "".join(rects) + cm.group(4), 1)
-    return re.sub(r'width="[\d.]+mm" height="[\d.]+mm" viewBox="0 0 [\d.]+ [\d.]+"',
-                  f'width="{(W + 2 * pad) / 72 * 25.4:.2f}mm" height="{(H + 2 * pad) / 72 * 25.4:.2f}mm" '
-                  f'viewBox="{-pad} {-pad} {W + 2 * pad:.2f} {H + 2 * pad:.2f}"', svg, count=1)
-
-
 def lua_cmd() -> list[str]:
     for exe in ("texlua", "lua5.4", "lua5.3", "lua"):
         if shutil.which(exe):
@@ -90,15 +66,16 @@ def grow(svg_lua: Path, seed: int, gen: dict, out: Path) -> None:
     from PIL import Image, PngImagePlugin
     if not shutil.which("rsvg-convert"):
         raise SystemExit("make_gardens: нужен rsvg-convert (пакет librsvg2-bin)")
+    # --bleed (florilegium #27): the garden is not cut along the sheet's edges, and the SVG
+    # grows by PAD_PT on every side; the live garden (shmuc.js) asks for the same bleed
     args = PAGE + ["--seed", str(seed), "--ink", gen["ink"], "--accent", gen["accent"],
-                   "--theme", gen["theme"], "--season", str(gen["season"])]
+                   "--theme", gen["theme"], "--season", str(gen["season"]), "--bleed", f"{PAD_PT}bp"]
     if gen.get("novisitors"):
         args.append("--novisitors")
     with tempfile.TemporaryDirectory() as td:
-        raw, wide, png = Path(td, "raw.svg"), Path(td, "wide.svg"), Path(td, "wide.png")
+        wide, png = Path(td, "wide.svg"), Path(td, "wide.png")
         # запуск из временной папки: florilegium-svg.lua подгружает соседние .lua по своему пути
-        subprocess.run(lua_cmd() + [str(svg_lua.resolve())] + args + ["-o", str(raw)], check=True, cwd=td)
-        wide.write_text(unclip(raw.read_text(encoding="utf-8"), PAD_PT), encoding="utf-8")
+        subprocess.run(lua_cmd() + [str(svg_lua.resolve())] + args + ["-o", str(wide)], check=True, cwd=td)
         w_mm = float(re.search(r'width="([\d.]+)mm"', wide.read_text(encoding="utf-8")).group(1))
         subprocess.run(["rsvg-convert", "-w", str(round(w_mm * PX_PER_MM)), str(wide), "-o", str(png)], check=True)
         im = Image.open(png).convert("RGBA")
@@ -118,7 +95,7 @@ def grow(svg_lua: Path, seed: int, gen: dict, out: Path) -> None:
 
 
 def stamp(seed: int, gen: dict) -> str:
-    return json.dumps({"seed": seed, **gen, "page": PAGE, "crop": CROP_PX}, sort_keys=True)
+    return json.dumps({"seed": seed, **gen, "page": PAGE, "crop": CROP_PX, "bleed": PAD_PT}, sort_keys=True)
 
 
 # ───────── сады в главах: движок на JS (node), без Lua ─────────

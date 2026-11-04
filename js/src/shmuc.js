@@ -25,34 +25,18 @@
     return { W: W, left: left, right: right, textleft: left, textright: W - right };
   }
 
-  // garden mask: outer sides are dropped so leaves at the sheet edge are not cut
-  // (like unclip in ebook-build/scripts/make_gardens.py); inner ones (the title zone border) stay
-  function unclip(svg, s) {
-    var Hpt = H / PT_MM, far = 120, edge = (s.textright - 10) / PT_MM;
-    var re = /(<clipPath id="[^"]+"><path d=")([^"]+)("\/><\/clipPath>)/;
-    var m = re.exec(svg);
-    if (!m) return svg;
-    var rects = [], r, rr = /M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)Z/g;
-    while ((r = rr.exec(m[2]))) {
-      var x1 = Math.min(+r[1], +r[3]), x2 = Math.max(+r[1], +r[3]);
-      var y1 = Math.min(+r[2], +r[6]), y2 = Math.max(+r[2], +r[6]);
-      if (x1 < 8) x1 -= far;
-      if (y1 < 8) y1 -= far;
-      if (y2 > Hpt - 8) y2 += far;
-      if (x2 > edge) x2 += far;
-      rects.push("M" + x1 + " " + y1 + "L" + x2 + " " + y1 + "L" + x2 + " " + y2 + "L" + x1 + " " + y2 + "Z");
-    }
-    return svg.replace(m[0], m[1] + rects.join("") + m[3]);
-  }
+  // the garden is not cut along the sheet's edges: bleed (florilegium-svg.lua's --bleed, #27),
+  // the same 40 bp that make_gardens.py gives the static picture, so both are clipped alike
+  var BLEED = "40bp";
 
   function grow(el, s) {
     var d = el.getAttribute("data-florilegium").split(" ");   // seed ink accent [season] [novisitors]
     var o = { seed: +d[0], ink: d[1], accent: d[2], paper: s.W + "x" + H,
       left: s.left + "mm", right: s.right + "mm", top: TOP + "mm", bottom: BOTTOM + "mm",
-      headsep: "0mm", headheight: "0pt", textend: TEXTEND + "mm", id: "flo" + d[0] + "w" + s.W + "-" };
+      headsep: "0mm", headheight: "0pt", textend: TEXTEND + "mm", bleed: BLEED, id: "flo" + d[0] + "w" + s.W + "-" };
     if (d[3] && d[3] !== "summer") o.season = d[3];
     if (d[4] === "novisitors") o.visitors = false;
-    var svg = unclip(F.page(o).svg, s);
+    var svg = F.page(o).svg;
     var inner = svg.slice(svg.indexOf("<g transform"), svg.lastIndexOf("</svg>"));
     var doc = new DOMParser().parseFromString('<svg xmlns="' + NS + '"><g class="flo-garden" transform="scale(' + PT_MM + ')">' +
       inner + "</g></svg>", "image/svg+xml");

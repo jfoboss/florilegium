@@ -204,6 +204,10 @@ function page(o) {
   g.marks = [];
   g.seed = seed; g.spill = spill; g.spilly = spilly; g.visitors = visitors; g.age = age; g.theme = undefined;
   if (density < 1) g.density = Math.max(0.03, density);
+  // bleed (a length, florilegium-svg.lua's --bleed): the garden runs that far past the
+  // paper's edges, uncut, and the SVG grows by as much on every side
+  const bleed = o.bleed !== undefined && o.bleed !== null ? sp(o.bleed) * 2.54 / (72.27 * 65536) : undefined;
+  if (bleed !== undefined) g.bleed = bleed;
   const old = ink.set_pale(0.85 * (1 - Math.max(0, Math.min(1, intensity))));
   let stats;
   try {
@@ -220,8 +224,12 @@ function page(o) {
   const CM = 72 / 2.54;
   const W = g.pw * CM, H = g.ph * CM;
   const id = o.id || ("flo" + floor(Number(o.seed) || 0) + "-");
-  const out = ['<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed(g.pw * 10, 2) + 'mm" height="' + fixed(g.ph * 10, 2) +
-    'mm" viewBox="0 0 ' + fixed(W, 2) + " " + fixed(H, 2) + '">'];
+  const out = [bleed === undefined
+    ? '<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed(g.pw * 10, 2) + 'mm" height="' + fixed(g.ph * 10, 2) +
+      'mm" viewBox="0 0 ' + fixed(W, 2) + " " + fixed(H, 2) + '">'
+    : '<svg xmlns="http://www.w3.org/2000/svg" width="' + fixed((g.pw + 2 * bleed) * 10, 2) + 'mm" height="' +
+      fixed((g.ph + 2 * bleed) * 10, 2) + 'mm" viewBox="' + fixed(-bleed * CM, 2) + " " + fixed(-bleed * CM, 2) + " " +
+      fixed(W + 2 * bleed * CM, 2) + " " + fixed(H + 2 * bleed * CM, 2) + '">'];
   if (o.background) {
     const h = String(o.background).replace(/^#/, "");
     if (!/^[0-9a-fA-F]{6}$/.test(h)) throw new Error("florilegium: not a color (RRGGBB): '" + h + "'");

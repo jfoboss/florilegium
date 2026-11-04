@@ -32,6 +32,13 @@ if (!quick) {
   }
   for (const seed of [1, 2, 6, 8]) for (const ex of extras.slice(1)) cases.push(Object.assign({}, BASE, { seed }, ex));
 }
+// bleed (#27): the clip open along the paper's edges, the SVG larger on every side;
+// a part-title sheet, a mirrored one, a phone-sized one without textend, and quick mode too
+for (const [seed, o] of [[3, {}], [7, { left: "12mm", right: "36mm" }], [11, { paper: "70x150", left: "22mm", right: "6mm", top: "20mm", bottom: "8mm", textend: undefined }]]) {
+  const c = Object.assign({}, BASE, { seed, bleed: "14mm" }, o);
+  if (c.textend === undefined) delete c.textend;
+  cases.push(c);
+}
 
 const tmp = fs.mkdtempSync("/tmp/pagex-");
 let bad = 0, tl = 0, tj = 0;

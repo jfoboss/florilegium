@@ -646,12 +646,23 @@ function page(g) {
     ink.circle(x2 + 0.45, e[1], 0.025); ink.fill(ink.accent(0));
   }
 
-  // assemble: a safety clip a little outside the regions, then the layers
+  // assemble: a safety clip a little outside the regions, then the layers. With g.bleed
+  // (florilegium-svg.lua's bleed, #27) the sides that lie along the paper's edges move out
+  // to the bleed, so nothing is cut by a straight line there; the sides facing the text stay.
   ink.tag(null);
   ink.layer(0);
   for (const r of rects) {
-    const xr = r[2] + (r === col ? 0.25 : 0.3);
-    ink.poly([[r[0] - 0.25, r[1] - 0.3], [xr, r[1] - 0.3], [xr, r[3] + 0.3], [r[0] - 0.25, r[3] + 0.3]], true);
+    let x1 = r[0] - 0.25, y1 = r[1] - 0.3, x2 = r[2] + (r === col ? 0.25 : 0.3), y2 = r[3] + 0.3;
+    if (g.bleed !== undefined) {
+      // a footer band squeezed by a small bottom margin can come out upside down
+      // (top below bottom); order it first, or the bleed moves it off the paper
+      if (y2 < y1) { const t = y1; y1 = y2; y2 = t; }
+      if (r[0] < 1) x1 = -g.bleed;
+      if (r[1] < 1) y1 = -g.bleed;
+      if (r[2] > g.pw - 1) x2 = g.pw + g.bleed;
+      if (r[3] > g.ph - 1) y2 = g.ph + g.bleed;
+    }
+    ink.poly([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], true);
   }
   ink.clip();
   ink.layer(99);

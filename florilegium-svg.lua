@@ -175,6 +175,9 @@ end
 -- of the text block: the last page, with the garden in the space below), season
 -- ("spring", "summer", "autumn" or 0..1), theme, density, intensity, visitors,
 -- ink, accent (RRGGBB), head (false: no head rule), authored, background (RRGGBB),
+-- bleed (a length: the grown garden may run that far past the paper's edges, which no
+-- longer cut it, and the SVG grows by as much on every side; for a garden set on a
+-- page that does not end where the paper does, an e-book's part-title page say),
 -- id (prefix for the clip ids). Returns the SVG, the page layout g (cm), and a table:
 -- streams, the PDF literals the SVG was made from; captions, the text a theme sets in
 -- the margin (the math theme's symbols and equations), which needs a TeX typesetter
@@ -231,6 +234,7 @@ function M.page(o)
     fl.density = tonumber(o.density) or 1
     fl.intensity = tonumber(o.intensity) or 1
     fl.visitors = o.visitors ~= false
+    fl.bleed = o.bleed and M.sp(o.bleed) * 2.54 / (72.27 * 65536) or nil
     local g = fl.geometry()
     fl.last_captions, fl.last_stats = nil, nil
     if o.authored then fl.authored(seed, nil)
@@ -255,11 +259,14 @@ function M.page(o)
       }
     end
     ink.set_pale(0)
+    fl.bleed = nil
     return { g = g, captions = caps, stats = fl.last_stats }
   end)
   if not ok then                              -- leave nothing half drawn for the next page
     local ink = package.loaded["florilegium-ink"]
     if ink then ink.take_recording() ink.discard() ink.set_lift(0) ink.set_pale(0) end
+    local fl = package.loaded["florilegium"]
+    if fl then fl.bleed = nil end
   end
   tex, node, luatexbase, texio = saved.tex, saved.node, saved.luatexbase, saved.texio
   if not ok then error(res, 0) end
@@ -269,9 +276,14 @@ function M.page(o)
   local CM = 72 / 2.54
   local W, H = g.pw * CM, g.ph * CM
   local id = o.id or fmt("flo%d-", floor(tonumber(o.seed) or 0))
-  local out = {
-    fmt('<svg xmlns="http://www.w3.org/2000/svg" width="%.2fmm" height="%.2fmm" viewBox="0 0 %.2f %.2f">', g.pw * 10, g.ph * 10, W, H),
-  }
+  local out = {}
+  if o.bleed then
+    local b = M.sp(o.bleed) * 2.54 / (72.27 * 65536)
+    out[1] = fmt('<svg xmlns="http://www.w3.org/2000/svg" width="%.2fmm" height="%.2fmm" viewBox="%.2f %.2f %.2f %.2f">',
+      (g.pw + 2 * b) * 10, (g.ph + 2 * b) * 10, -b * CM, -b * CM, W + 2 * b * CM, H + 2 * b * CM)
+  else
+    out[1] = fmt('<svg xmlns="http://www.w3.org/2000/svg" width="%.2fmm" height="%.2fmm" viewBox="0 0 %.2f %.2f">', g.pw * 10, g.ph * 10, W, H)
+  end
   if o.background then
     local h = tostring(o.background):gsub("^#", "")
     if not h:match("^%x%x%x%x%x%x$") then error("florilegium: not a color (RRGGBB): '" .. h .. "'", 0) end
@@ -302,6 +314,8 @@ usage: texlua florilegium-svg.lua [options] > page.svg      (lua 5.3 or 5.4 work
   --nohead          leave out the head rule and its ivy leaf
   --authored        the hand-placed composition (A4, 68 mm left margin)
   --background RRGGBB   paint the paper (default: transparent)
+  --bleed LEN       let the garden run LEN past the paper's edges, uncut; the SVG grows by LEN
+                    on every side (for a garden set on a page of its own, as in an e-book)
   -o FILE           write to FILE instead of standard output
 A length is a number and a unit (mm, cm, in, pt, bp); a bare number is mm.
 ]]
@@ -310,7 +324,8 @@ function M.main(argv)
   local o, file = {}, nil
   local flags = { twoside = true, novisitors = "visitors", nohead = "head", authored = true }
   local values = { seed = 1, page = 1, paper = 1, left = 1, right = 1, top = 1, bottom = 1, headsep = 1, headheight = 1,
-    footskip = 1, textend = 1, season = 1, theme = 1, density = 1, intensity = 1, ink = 1, accent = 1, background = 1 }
+    footskip = 1, textend = 1, season = 1, theme = 1, density = 1, intensity = 1, ink = 1, accent = 1, background = 1,
+    bleed = 1 }
   local i = 1
   while i <= #argv do
     local a = argv[i]

@@ -348,11 +348,15 @@ local function pale() return 0.85 * (1 - math.max(0, math.min(1, M.intensity))) 
 -- the grown composition for this page; M.visitors = false (option novisitors)
 -- leaves out the butterflies, bees, snails and birds
 M.visitors = true
+-- how far the garden may run past the paper's edges, in cm (florilegium-svg.lua's bleed;
+-- nil in a document: a PDF page ends at the paper)
+M.bleed = nil
 function M.grown(seed, spill, spilly, box)
   local g = M.geometry()
   g.marks = themes(page_marks(box))
   g.seed, g.spill, g.spilly, g.visitors, g.age, g.theme = seed, spill, spilly, M.visitors, M.age, M.theme
   if M.density < 1 then g.density = math.max(0.03, M.density) end
+  g.bleed = M.bleed
   local old = ink.set_pale(pale())
   if frame then grown_frame(g)
   else

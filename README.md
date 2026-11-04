@@ -258,6 +258,18 @@ transparent background, which makes it a page background anywhere. In Typst:
   background: image("margin.svg", width: 100%, height: 100%))
 ```
 
+A garden set on a page of its own, such as the part-title page of an e-book, does not end
+where the paper does: the reader's screen, its margins and its theme are all around it, and the
+clip that keeps a printed margin inside the paper would cut the pale flowers along a straight
+line in the middle of the screen. `--bleed LEN` leaves the clip open along the paper's edges, so
+the garden may run up to LEN past them, and grows the SVG by LEN on every side; the sides that
+face the text keep their clip, so the space for a title stays empty.
+
+```sh
+lua florilegium-svg.lua --seed 3 --paper 120x200 --left 36mm --right 12mm --top 36mm --bottom 12mm \
+  --headsep 0mm --headheight 0pt --textend 50mm --nohead --bleed 14mm > part-title.svg
+```
+
 The playground runs the same files in the browser with [wasmoon](https://github.com/ceifa/wasmoon),
 Lua 5.4 compiled to WebAssembly, in a background worker, and a page grows in about a second.
 Seed 7 there is seed 7 here. The proof is the control surface as much as the colophon is: the

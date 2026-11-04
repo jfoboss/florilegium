@@ -1,7 +1,10 @@
 # florilegium in JavaScript — live part-title pages for ePub
 
-A hand port of the grown composition from Lua to plain JavaScript (ES5 in the bundle, no
-dependencies), made to put florilegium gardens into ePub books. Scope: theme `flora`, the
+A hand port of the grown composition from Lua to plain JavaScript (no dependencies), made to
+put florilegium gardens into ePub books. The engine is modern JavaScript (`const`/`let`, arrow
+functions, `for…of`, `Map`, `??`: Safari 13.1, Chrome 80 and later); the page scripts
+`shmuc.js` and `chapter.js` are ES5. A reader whose engine is older fails to parse the bundle,
+and the page keeps its static garden, which is there for readers without scripts anyway. Scope: theme `flora`, the
 page without a header, no animation, no initials. The SVG it writes is **byte for byte** the
 one `florilegium-svg.lua` writes for the same options. On top of the port, engine version 2
 adds chapter ornaments made with the same engine (they have no Lua counterpart).

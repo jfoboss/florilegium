@@ -2775,7 +2775,7 @@ root.FlorilegiumGarden = { page: req("page.js").page, band: O.band, tailgarden: 
   }
 
   // garden mask: outer sides are dropped so leaves at the sheet edge are not cut
-  // (like unclip in make_gardens.py); inner ones (the title zone border) stay
+  // (like unclip in ebook-build/scripts/make_gardens.py); inner ones (the title zone border) stay
   function unclip(svg, s) {
     var Hpt = H / PT_MM, far = 120, edge = (s.textright - 10) / PT_MM;
     var re = /(<clipPath id="[^"]+"><path d=")([^"]+)("\/><\/clipPath>)/;

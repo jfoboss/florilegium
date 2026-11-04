@@ -32,7 +32,7 @@ Upstream's own README is [`README.md`](../README.md); everything there still hol
 | [`js/`](../js/README.md) | Порт генератора на JavaScript: страница с садом, заставка главы, концовка, плитка буквицы и скрипты живых страниц ePub. Один файл [`js/dist/florilegium-garden.js`](../js/dist/florilegium-garden.js), около 135 КБ, без зависимостей |
 | [`ebook-build/`](../ebook-build/SKILL.md) | Скилл для Claude: сборка ePub, FB2, MOBI, Markdown и фрагментов из глав в Markdown, проверка готовых файлов, режимы, альфа-сборки, сады, переносимый комплект проекта |
 | [`examples/war-in-heaven/`](../examples/war-in-heaven/README.md) | Рассказ «Война в Раю», собранный тремя способами: спокойно, с садами, с живым садом |
-| всё остальное | florilegium как есть, синхронизируется с автором |
+| всё остальное | florilegium [v1.3](https://github.com/kevinraymond/florilegium/releases/tag/v1.3) как есть |
 
 ## Как это выглядит
 
@@ -127,7 +127,9 @@ python3 ../../ebook-build/scripts/build_book.py --config book.json --all-modes
 
 ## Синхронизация с florilegium
 
-Форк держится рядом с оригиналом: файлы автора не правятся, всё своё лежит в `js/`, `ebook-build/`, `examples/` и в этом `README` (`.github/README.md`, поэтому `README.md` автора остаётся нетронутым). Обновиться: **Sync fork** на странице репозитория. После этого прогоните сверку порта, она скажет, если автор поменял рисунок:
+Форк держится рядом с оригиналом: файлы автора не правятся, всё своё лежит в `js/`, `ebook-build/`, `examples/` и в этом `README` (`.github/README.md`, поэтому `README.md` автора остаётся нетронутым).
+
+Порт сверен с релизом [v1.3](https://github.com/kevinraymond/florilegium/releases/tag/v1.3), и форк стоит на нём. Автор решил не держать вторую реализацию у себя, поэтому порт живёт здесь. Обновляться лучше до следующего тега, а не до любого коммита в `main`: **Sync fork** на странице репозитория или `git merge v1.4`. После этого прогоните сверку порта, она скажет, если автор поменял рисунок:
 
 ```bash
 LUA=lua5.4 node js/test/page_cross.js
